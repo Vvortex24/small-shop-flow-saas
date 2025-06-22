@@ -14,19 +14,19 @@ const Layout = () => {
         <header className="h-16 border-b bg-white flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
             <SidebarTrigger className="lg:hidden" />
-            <h1 className="text-xl font-semibold text-business hidden lg:block">متجري</h1>
+            <h1 className="text-xl font-semibold text-business hidden lg:block">MyStore</h1>
           </div>
           
           <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" className="text-business border-business hover:bg-business-light">
-              اشتراكي
+              My Plan
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" />
-                <AvatarFallback className="bg-business text-white">أح</AvatarFallback>
+                <AvatarFallback className="bg-business text-white">AM</AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium hidden sm:block">أحمد محمد</span>
+              <span className="text-sm font-medium hidden sm:block">Ahmad Mohammed</span>
             </div>
           </div>
         </header>

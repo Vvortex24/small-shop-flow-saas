@@ -14,55 +14,55 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // بيانات وهمية للطلبات
+  // Sample order data
   const orders = [
     {
       id: "001",
-      customer: "سارة أحمد",
+      customer: "Sara Ahmed",
       phone: "0551234567",
-      total: 850,
+      total: 177000,
       status: "completed",
       date: "2024-01-20",
-      items: ["فستان أزرق", "حقيبة يد"],
-      notes: "توصيل سريع"
+      items: ["Blue Dress", "Handbag"],
+      notes: "Express delivery"
     },
     {
       id: "002", 
-      customer: "محمد علي",
+      customer: "Mohammed Ali",
       phone: "0559876543",
-      total: 1200,
+      total: 250000,
       status: "pending",
       date: "2024-01-19",
-      items: ["بدلة رسمية", "حزام جلدي"],
+      items: ["Formal Suit", "Leather Belt"],
       notes: ""
     },
     {
       id: "003",
-      customer: "فاطمة خالد", 
+      customer: "Fatima Khaled", 
       phone: "0552468135",
-      total: 650,
+      total: 135000,
       status: "cancelled",
       date: "2024-01-18",
-      items: ["فستان أحمر"],
-      notes: "لم تعد تريد المنتج"
+      items: ["Red Dress"],
+      notes: "Customer no longer wants the item"
     }
   ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-profit text-white">مكتمل</Badge>;
+        return <Badge className="bg-profit text-white">Completed</Badge>;
       case "pending":
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-600">قيد المعالجة</Badge>;
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-600">Pending</Badge>;
       case "cancelled":
-        return <Badge variant="destructive">ملغي</Badge>;
+        return <Badge variant="destructive">Cancelled</Badge>;
       default:
-        return <Badge variant="secondary">غير محدد</Badge>;
+        return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer.includes(searchTerm) || order.phone.includes(searchTerm);
+    const matchesSearch = order.customer.toLowerCase().includes(searchTerm.toLowerCase()) || order.phone.includes(searchTerm);
     const matchesFilter = filterStatus === "all" || order.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -72,53 +72,53 @@ const Orders = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">إدارة الطلبات</h1>
-          <p className="text-gray-600 mt-1">تتبع وإدارة جميع طلبات العملاء</p>
+          <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
+          <p className="text-gray-600 mt-1">Track and manage all customer orders</p>
         </div>
         
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-profit hover:bg-profit-dark gap-2">
               <Plus className="w-4 h-4" />
-              طلب جديد
+              New Order
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-lg">إضافة طلب جديد</DialogTitle>
+              <DialogTitle className="text-lg">Add New Order</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="customer">اسم العميل</Label>
-                <Input id="customer" placeholder="أدخل اسم العميل" />
+                <Label htmlFor="customer">Customer Name</Label>
+                <Input id="customer" placeholder="Enter customer name" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">رقم الهاتف</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" placeholder="05xxxxxxxx" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="items">المنتجات</Label>
+                <Label htmlFor="items">Products</Label>
                 <Select>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر المنتجات" />
+                    <SelectValue placeholder="Select products" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="dress-blue">فستان أزرق - 250 ريال</SelectItem>
-                    <SelectItem value="suit-formal">بدلة رسمية - 800 ريال</SelectItem>
-                    <SelectItem value="bag-hand">حقيبة يد - 180 ريال</SelectItem>
+                    <SelectItem value="dress-blue">Blue Dress - 52,000 SYP</SelectItem>
+                    <SelectItem value="suit-formal">Formal Suit - 167,000 SYP</SelectItem>
+                    <SelectItem value="bag-hand">Handbag - 37,500 SYP</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notes">ملاحظات</Label>
-                <Textarea id="notes" placeholder="أي ملاحظات خاصة..." rows={3} />
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea id="notes" placeholder="Any special notes..." rows={3} />
               </div>
               
               <Button className="w-full bg-profit hover:bg-profit-dark">
-                إضافة الطلب
+                Add Order
               </Button>
             </div>
           </DialogContent>
@@ -130,25 +130,25 @@ const Orders = () => {
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="البحث في الطلبات..."
+                placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-9"
+                className="pl-9"
               />
             </div>
             
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full sm:w-48">
-                <Filter className="w-4 h-4 ml-2" />
+                <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الطلبات</SelectItem>
-                <SelectItem value="completed">مكتملة</SelectItem>
-                <SelectItem value="pending">قيد المعالجة</SelectItem>
-                <SelectItem value="cancelled">ملغية</SelectItem>
+                <SelectItem value="all">All Orders</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -176,7 +176,7 @@ const Orders = () => {
                   </div>
                   
                   <div className="mb-3">
-                    <p className="text-sm text-gray-600 mb-1">المنتجات:</p>
+                    <p className="text-sm text-gray-600 mb-1">Products:</p>
                     <div className="flex flex-wrap gap-2">
                       {order.items.map((item, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
@@ -188,14 +188,14 @@ const Orders = () => {
                   
                   {order.notes && (
                     <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                      <strong>ملاحظات:</strong> {order.notes}
+                      <strong>Notes:</strong> {order.notes}
                     </p>
                   )}
                 </div>
                 
-                <div className="text-left lg:text-right space-y-2">
+                <div className="text-right space-y-2">
                   {getStatusBadge(order.status)}
-                  <p className="text-2xl font-bold text-business">{order.total} ريال</p>
+                  <p className="text-2xl font-bold text-business">{order.total.toLocaleString()} SYP</p>
                   <p className="text-sm text-gray-500">{order.date}</p>
                 </div>
               </div>
@@ -208,8 +208,8 @@ const Orders = () => {
         <Card>
           <CardContent className="p-12 text-center">
             <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد طلبات</h3>
-            <p className="text-gray-600">ابدأ بإضافة طلبك الأول</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+            <p className="text-gray-600">Start by adding your first order</p>
           </CardContent>
         </Card>
       )}

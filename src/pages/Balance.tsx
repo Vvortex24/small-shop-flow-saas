@@ -5,69 +5,69 @@ import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Balance = () => {
-  // بيانات وهمية
-  const totalBalance = 15750;
-  const totalProfit = 23500;
-  const totalExpenses = 7750;
+  // Sample data
+  const totalBalance = 3275000; // in Syrian Lira
+  const totalProfit = 4890000;
+  const totalExpenses = 1615000;
   const profitPercentage = 67.0;
   const expensePercentage = 33.0;
 
-  // سجل العمليات المالية
+  // Financial transactions log
   const transactions = [
     {
       id: "1",
       type: "profit",
-      amount: 850,
-      description: "طلب من سارة أحمد - فستان أزرق",
+      amount: 177000,
+      description: "Order from Sara Ahmed - Blue Dress",
       date: "2024-01-20",
       time: "14:30"
     },
     {
       id: "2", 
       type: "expense",
-      amount: 200,
-      description: "شراء مواد خام - قماش قطني",
+      amount: 41700,
+      description: "Raw materials purchase - Cotton fabric",
       date: "2024-01-20", 
       time: "10:15"
     },
     {
       id: "3",
       type: "profit", 
-      amount: 1200,
-      description: "طلب من محمد علي - بدلة رسمية",
+      amount: 250000,
+      description: "Order from Mohammed Ali - Formal suit",
       date: "2024-01-19",
       time: "16:45"
     },
     {
       id: "4",
       type: "expense",
-      amount: 150,
-      description: "مصروف شحن وتوصيل",
+      amount: 31300,
+      description: "Shipping and delivery costs",
       date: "2024-01-19",
       time: "12:20"
     },
     {
       id: "5",
       type: "profit",
-      amount: 650,
-      description: "طلب من فاطمة خالد - حقيبة يد",
+      amount: 135000,
+      description: "Order from Fatima Khaled - Handbag",
       date: "2024-01-18",
       time: "09:30"
     }
   ];
 
-  // تحليل أسبوعي وهمي
+  // Sample weekly analysis
   const weeklyAnalysis = {
     profitChange: +12.5,
     expenseChange: -8.3,
-    comparison: "مقارنة بالأسبوع السابق"
+    comparison: "compared to last week"
   };
 
   const monthlyData = [
-    { month: "يناير", profit: 23500, expense: 7750 },
-    { month: "فبراير", profit: 18200, expense: 6400 },
-    { month: "مارس", profit: 26800, expense: 8900 },
-    { month: "أبريل", profit: 21500, expense: 7200 },
+    { month: "January", profit: 4890000, expense: 1615000 },
+    { month: "February", profit: 3788000, expense: 1333000 },
+    { month: "March", profit: 5580000, expense: 1854000 },
+    { month: "April", profit: 4475000, expense: 1500000 },
   ];
 
   return (
@@ -75,20 +75,20 @@ const Balance = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">الرصيد المالي</h1>
-          <p className="text-gray-600 mt-1">تتبع الأرباح والمصاريف</p>
+          <h1 className="text-2xl font-bold text-gray-900">Financial Balance</h1>
+          <p className="text-gray-600 mt-1">Track profits and expenses</p>
         </div>
         
         <Select defaultValue="current-month">
           <SelectTrigger className="w-48">
-            <Calendar className="w-4 h-4 ml-2" />
+            <Calendar className="w-4 h-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="current-month">الشهر الحالي</SelectItem>
-            <SelectItem value="last-month">الشهر السابق</SelectItem>
-            <SelectItem value="quarter">آخر 3 أشهر</SelectItem>
-            <SelectItem value="year">السنة الحالية</SelectItem>
+            <SelectItem value="current-month">Current Month</SelectItem>
+            <SelectItem value="last-month">Last Month</SelectItem>
+            <SelectItem value="quarter">Last 3 Months</SelectItem>
+            <SelectItem value="year">Current Year</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -98,23 +98,23 @@ const Balance = () => {
         {/* Total Balance */}
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">الرصيد الإجمالي</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Total Balance</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-business mb-2">{totalBalance.toLocaleString()} ريال</p>
+                <p className="text-3xl font-bold text-business mb-2">{totalBalance.toLocaleString()} SYP</p>
                 <div className="flex items-center justify-center gap-2">
                   <TrendingUp className="w-4 h-4 text-profit" />
-                  <span className="text-sm text-profit font-medium">في الربح</span>
+                  <span className="text-sm text-profit font-medium">In profit</span>
                 </div>
               </div>
               
               {/* Progress Bar */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-profit">الأرباح</span>
-                  <span className="text-expense">المصاريف</span>
+                  <span className="text-profit">Profit</span>
+                  <span className="text-expense">Expenses</span>
                 </div>
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden flex">
                   <div 
@@ -139,7 +139,7 @@ const Balance = () => {
         <Card className="border-profit/20">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-gray-600">إجمالي الأرباح</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">Total Profit</CardTitle>
               <div className="w-8 h-8 bg-profit-light rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-profit" />
               </div>
@@ -162,7 +162,7 @@ const Balance = () => {
         <Card className="border-expense/20">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-gray-600">إجمالي المصاريف</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">Total Expenses</CardTitle>
               <div className="w-8 h-8 bg-expense-light rounded-lg flex items-center justify-center">
                 <TrendingDown className="w-4 h-4 text-expense" />
               </div>
@@ -190,9 +190,9 @@ const Balance = () => {
               <TrendingUp className="w-4 h-4 text-business" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-semibold text-business">التحليل الأسبوعي</h4>
+              <h4 className="font-semibold text-business">Weekly Analysis</h4>
               <p className="text-sm text-blue-700">
-                زادت الأرباح بنسبة <strong>{weeklyAnalysis.profitChange}%</strong> وانخفضت المصاريف بنسبة <strong>{Math.abs(weeklyAnalysis.expenseChange)}%</strong> مقارنة بالأسبوع السابق. أداء ممتاز! 🎉
+                Profits increased by <strong>{weeklyAnalysis.profitChange}%</strong> and expenses decreased by <strong>{Math.abs(weeklyAnalysis.expenseChange)}%</strong> compared to last week. Excellent performance! 🎉
               </p>
             </div>
           </div>
@@ -202,14 +202,14 @@ const Balance = () => {
       {/* Tabs for Details */}
       <Tabs defaultValue="transactions" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="transactions">سجل العمليات</TabsTrigger>
-          <TabsTrigger value="reports">التقارير الشهرية</TabsTrigger>
+          <TabsTrigger value="transactions">Transaction Log</TabsTrigger>
+          <TabsTrigger value="reports">Monthly Reports</TabsTrigger>
         </TabsList>
         
         <TabsContent value="transactions" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">آخر العمليات المالية</CardTitle>
+              <CardTitle className="text-lg">Recent Financial Transactions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -229,11 +229,11 @@ const Balance = () => {
                         <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
                       </div>
                     </div>
-                    <div className="text-left">
+                    <div className="text-right">
                       <span className={`text-lg font-bold ${
                         transaction.type === 'profit' ? 'text-profit' : 'text-expense'
                       }`}>
-                        {transaction.type === 'profit' ? '+' : '-'}{transaction.amount} ريال
+                        {transaction.type === 'profit' ? '+' : '-'}{transaction.amount.toLocaleString()} SYP
                       </span>
                     </div>
                   </div>
@@ -246,7 +246,7 @@ const Balance = () => {
         <TabsContent value="reports" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">التقرير الشهري</CardTitle>
+              <CardTitle className="text-lg">Monthly Report</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -255,14 +255,14 @@ const Balance = () => {
                     <div className="flex justify-between items-center">
                       <h4 className="font-semibold">{month.month}</h4>
                       <span className="text-lg font-bold text-business">
-                        {(month.profit - month.expense).toLocaleString()} ريال
+                        {(month.profit - month.expense).toLocaleString()} SYP
                       </span>
                     </div>
                     
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-profit">أرباح: {month.profit.toLocaleString()} ريال</span>
-                        <span className="text-expense">مصاريف: {month.expense.toLocaleString()} ريال</span>
+                        <span className="text-profit">Profit: {month.profit.toLocaleString()} SYP</span>
+                        <span className="text-expense">Expenses: {month.expense.toLocaleString()} SYP</span>
                       </div>
                       
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden flex">

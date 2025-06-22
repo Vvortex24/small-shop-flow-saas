@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  // بيانات وهمية للعرض
-  const totalBalance = 15750;
-  const totalProfit = 23500;
-  const totalExpenses = 7750;
+  // Sample data for display
+  const totalBalance = 3275000; // in Syrian Lira
+  const totalProfit = 4890000;
+  const totalExpenses = 1615000;
   const ordersCount = 145;
   const inventoryCount = 67;
   const profitPercentage = 12.5;
@@ -17,8 +17,8 @@ const Dashboard = () => {
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Welcome Message */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً أحمد محمد! 👋</h1>
-        <p className="text-gray-600">إليك ملخص نشاط متجرك اليوم</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Ahmad Mohammed! 👋</h1>
+        <p className="text-gray-600">Here's your store activity summary for today</p>
       </div>
 
       {/* Main Balance Card */}
@@ -26,11 +26,11 @@ const Dashboard = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm mb-1">الرصيد الإجمالي</p>
-              <p className="text-3xl font-bold text-shadow">{totalBalance.toLocaleString()} ريال</p>
+              <p className="text-blue-100 text-sm mb-1">Total Balance</p>
+              <p className="text-3xl font-bold text-shadow">{totalBalance.toLocaleString()} SYP</p>
               <div className="flex items-center gap-2 mt-2">
                 <TrendingUp className="w-4 h-4 text-green-300" />
-                <span className="text-green-300 text-sm font-medium">+{profitPercentage}% هذا الشهر</span>
+                <span className="text-green-300 text-sm font-medium">+{profitPercentage}% this month</span>
               </div>
             </div>
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
@@ -45,56 +45,56 @@ const Dashboard = () => {
         {/* Profit Card */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">الأرباح</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Profit</CardTitle>
             <div className="w-8 h-8 bg-profit-light rounded-lg flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-profit" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-profit">{totalProfit.toLocaleString()}</div>
-            <p className="text-xs text-green-600 mt-1">ريال سعودي</p>
+            <p className="text-xs text-green-600 mt-1">Syrian Lira</p>
           </CardContent>
         </Card>
 
         {/* Expenses Card */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">المصاريف</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Expenses</CardTitle>
             <div className="w-8 h-8 bg-expense-light rounded-lg flex items-center justify-center">
               <TrendingDown className="w-4 h-4 text-expense" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-expense">{totalExpenses.toLocaleString()}</div>
-            <p className="text-xs text-red-600 mt-1">ريال سعودي</p>
+            <p className="text-xs text-red-600 mt-1">Syrian Lira</p>
           </CardContent>
         </Card>
 
         {/* Orders Card */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">الطلبات</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Orders</CardTitle>
             <div className="w-8 h-8 bg-business-light rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-4 h-4 text-business" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-business">{ordersCount}</div>
-            <p className="text-xs text-blue-600 mt-1">طلب هذا الشهر</p>
+            <p className="text-xs text-blue-600 mt-1">orders this month</p>
           </CardContent>
         </Card>
 
         {/* Inventory Card */}
         <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">المخزون</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Inventory</CardTitle>
             <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
               <Package className="w-4 h-4 text-orange-600" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{inventoryCount}</div>
-            <p className="text-xs text-orange-600 mt-1">منتج متوفر</p>
+            <p className="text-xs text-orange-600 mt-1">items available</p>
           </CardContent>
         </Card>
       </div>
@@ -102,28 +102,28 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">الإجراءات السريعة</CardTitle>
+          <CardTitle className="text-lg">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button asChild className="h-20 flex-col gap-2 bg-profit hover:bg-profit-dark">
               <Link to="/orders">
                 <ShoppingCart className="w-6 h-6" />
-                <span>إضافة طلب جديد</span>
+                <span>Add New Order</span>
               </Link>
             </Button>
             
             <Button asChild variant="outline" className="h-20 flex-col gap-2 border-business text-business hover:bg-business-light">
               <Link to="/inventory">
                 <Package className="w-6 h-6" />
-                <span>إضافة منتج</span>
+                <span>Add Product</span>
               </Link>
             </Button>
             
             <Button asChild variant="outline" className="h-20 flex-col gap-2 border-gray-300 hover:bg-gray-50">
               <Link to="/balance">
                 <DollarSign className="w-6 h-6" />
-                <span>عرض التقارير</span>
+                <span>View Reports</span>
               </Link>
             </Button>
           </div>
@@ -133,14 +133,14 @@ const Dashboard = () => {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">النشاط الأخير</CardTitle>
+          <CardTitle className="text-lg">Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
-              { type: 'order', customer: 'سارة أحمد', amount: 850, time: 'منذ ساعتين' },
-              { type: 'expense', item: 'مواد خام', amount: 200, time: 'منذ 4 ساعات' },
-              { type: 'order', customer: 'محمد علي', amount: 1200, time: 'أمس' },
+              { type: 'order', customer: 'Sara Ahmed', amount: 177000, time: '2 hours ago' },
+              { type: 'expense', item: 'Raw materials', amount: 41700, time: '4 hours ago' },
+              { type: 'order', customer: 'Mohammed Ali', amount: 250000, time: 'Yesterday' },
             ].map((activity, index) => (
               <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="font-medium text-sm">
-                      {activity.type === 'order' ? `طلب من ${activity.customer}` : activity.item}
+                      {activity.type === 'order' ? `Order from ${activity.customer}` : activity.item}
                     </p>
                     <p className="text-xs text-gray-500">{activity.time}</p>
                   </div>
@@ -162,7 +162,7 @@ const Dashboard = () => {
                 <span className={`font-bold ${
                   activity.type === 'order' ? 'text-profit' : 'text-expense'
                 }`}>
-                  {activity.type === 'order' ? '+' : '-'}{activity.amount} ريال
+                  {activity.type === 'order' ? '+' : '-'}{activity.amount.toLocaleString()} SYP
                 </span>
               </div>
             ))}

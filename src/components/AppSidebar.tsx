@@ -15,27 +15,27 @@ import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
-    title: "لوحة التحكم",
+    title: "Dashboard",
     url: "/",
     icon: Home,
   },
   {
-    title: "الطلبات",
+    title: "Orders",
     url: "/orders",
     icon: ShoppingCart,
   },
   {
-    title: "المخزون", 
+    title: "Inventory", 
     url: "/inventory",
     icon: Package,
   },
   {
-    title: "الرصيد",
+    title: "Balance",
     url: "/balance",
     icon: DollarSign,
   },
   {
-    title: "الملف الشخصي",
+    title: "Profile",
     url: "/profile",
     icon: User,
   },
@@ -45,13 +45,13 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="border-l">
+    <Sidebar className="border-r">
       <SidebarHeader className="border-b px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-business flex items-center justify-center">
             <Package className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-business">متجري</span>
+          <span className="text-lg font-bold text-business">MyStore</span>
         </div>
       </SidebarHeader>
       
@@ -83,7 +83,7 @@ export function AppSidebar() {
                 <SidebarMenuButton className="w-full h-12 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200">
                   <div className="flex items-center gap-3 px-4">
                     <Trash2 className="w-5 h-5" />
-                    <span className="font-medium">سلة المحذوفات</span>
+                    <span className="font-medium">Trash</span>
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
