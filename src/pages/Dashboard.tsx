@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   // Sample data for display
@@ -12,6 +13,18 @@ const Dashboard = () => {
   const ordersCount = 145;
   const inventoryCount = 67;
   const profitPercentage = 12.5;
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleNavigation = () => {
+    // Scroll to top when navigating
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+  };
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -106,21 +119,21 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button asChild className="h-20 flex-col gap-2 bg-profit hover:bg-profit-dark">
+            <Button asChild className="h-20 flex-col gap-2 bg-profit hover:bg-profit-dark" onClick={handleNavigation}>
               <Link to="/orders">
                 <ShoppingCart className="w-6 h-6" />
                 <span>Add New Order</span>
               </Link>
             </Button>
             
-            <Button asChild className="h-20 flex-col gap-2 bg-purple-600 hover:bg-purple-700 border-purple-600 text-white">
+            <Button asChild className="h-20 flex-col gap-2 bg-purple-600 hover:bg-purple-700 border-purple-600 text-white" onClick={handleNavigation}>
               <Link to="/inventory">
                 <Package className="w-6 h-6" />
                 <span>Add Product</span>
               </Link>
             </Button>
             
-            <Button asChild className="h-20 flex-col gap-2 bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white">
+            <Button asChild className="h-20 flex-col gap-2 bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white" onClick={handleNavigation}>
               <Link to="/balance">
                 <DollarSign className="w-6 h-6" />
                 <span>View Reports</span>

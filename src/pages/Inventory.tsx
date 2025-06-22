@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Package, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Package, Edit, Trash2, Upload, Camera } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   // Sample data for ready products
   const readyProducts = [
@@ -65,6 +67,23 @@ const Inventory = () => {
       addedDate: "2024-01-16"
     }
   ];
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProductImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setProductImage(null);
+    setImagePreview("");
+  };
 
   const filteredReadyProducts = readyProducts.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -123,7 +142,7 @@ const Inventory = () => {
                   New Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add New Product</DialogTitle>
                 </DialogHeader>
@@ -142,6 +161,45 @@ const Inventory = () => {
                       <Label htmlFor="quantity">Quantity</Label>
                       <Input id="quantity" type="number" placeholder="0" />
                     </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Product Photo</Label>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="file" 
+                        accept=".jpg,.jpeg,.png,.webp"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <Label htmlFor="image-upload" className="cursor-pointer">
+                        <Button type="button" variant="outline" className="gap-2" asChild>
+                          <span>
+                            <Camera className="w-4 h-4" />
+                            Upload Photo
+                          </span>
+                        </Button>
+                      </Label>
+                    </div>
+                    {imagePreview && (
+                      <div className="relative">
+                        <img 
+                          src={imagePreview} 
+                          alt="Product preview" 
+                          className="w-full h-32 object-cover rounded-lg border"
+                        />
+                        <Button 
+                          type="button"
+                          variant="ghost" 
+                          size="sm"
+                          className="absolute top-1 right-1 bg-white/80 hover:bg-white"
+                          onClick={removeImage}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-2">

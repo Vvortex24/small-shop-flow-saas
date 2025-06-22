@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -119,7 +118,7 @@ const Orders = () => {
               New Order
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-lg">Add New Order</DialogTitle>
             </DialogHeader>
@@ -197,7 +196,7 @@ const Orders = () => {
                   <span className="text-sm text-gray-500">{attachments.length}/5</span>
                 </div>
                 {attachments.length > 0 && (
-                  <div className="space-y-1">
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
                     {attachments.map((file, index) => (
                       <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                         <span className="text-sm truncate">{file.name}</span>
@@ -304,13 +303,12 @@ const Orders = () => {
                   <p className="text-2xl font-bold text-business">{order.total.toLocaleString()} SYP</p>
                   <p className="text-sm text-gray-500">{order.date}</p>
                   <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="outline" className="gap-1">
-                      <Edit className="w-3 h-3" />
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-1 text-red-600 hover:bg-red-50">
-                      <Trash2 className="w-3 h-3" />
-                      Delete
+                    <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
