@@ -11,10 +11,10 @@ import { User, Phone, Mail, MapPin, Calendar, Crown, Settings, Bell, Shield } fr
 
 const Profile = () => {
   const userInfo = {
-    name: "أحمد محمد السعدي",
+    name: "Ahmad Mohammed Al-Saadi",
     email: "ahmed.mohammed@email.com",
     phone: "0551234567",
-    location: "الرياض، المملكة العربية السعودية",
+    location: "Riyadh, Saudi Arabia",
     joinDate: "2024-01-01",
     subscription: "Premium",
     subscriptionExpiry: "2024-12-31"
@@ -31,8 +31,8 @@ const Profile = () => {
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">الملف الشخصي</h1>
-        <p className="text-gray-600 mt-1">إدارة معلوماتك الشخصية وإعدادات الحساب</p>
+        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+        <p className="text-gray-600 mt-1">Manage your personal information and account settings</p>
       </div>
 
       {/* Profile Overview */}
@@ -42,10 +42,10 @@ const Profile = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-12">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
               <AvatarImage src="" />
-              <AvatarFallback className="bg-business text-white text-2xl font-bold">أح</AvatarFallback>
+              <AvatarFallback className="bg-business text-white text-2xl font-bold">AM</AvatarFallback>
             </Avatar>
             
-            <div className="flex-1 text-center sm:text-right space-y-2">
+            <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">{userInfo.name}</h2>
@@ -66,28 +66,28 @@ const Profile = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-business">{businessStats.totalOrders}</p>
-            <p className="text-sm text-gray-600">إجمالي الطلبات</p>
+            <p className="text-sm text-gray-600">Total Orders</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-profit">{businessStats.totalRevenue.toLocaleString()}</p>
-            <p className="text-sm text-gray-600">إجمالي الإيرادات</p>
+            <p className="text-sm text-gray-600">Total Revenue</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-business">{businessStats.activeDays}</p>
-            <p className="text-sm text-gray-600">أيام النشاط</p>
+            <p className="text-sm text-gray-600">Active Days</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-orange-600">{businessStats.avgOrderValue}</p>
-            <p className="text-sm text-gray-600">متوسط قيمة الطلب</p>
+            <p className="text-sm text-gray-600">Avg Order Value</p>
           </CardContent>
         </Card>
       </div>
@@ -95,9 +95,9 @@ const Profile = () => {
       {/* Tabs */}
       <Tabs defaultValue="info" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="info">المعلومات الشخصية</TabsTrigger>
-          <TabsTrigger value="subscription">الاشتراك</TabsTrigger>
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+          <TabsTrigger value="info">Personal Information</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         
         {/* Personal Info Tab */}
@@ -106,35 +106,35 @@ const Profile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                المعلومات الشخصية
+                Personal Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">الاسم الكامل</Label>
+                  <Label htmlFor="name">Full Name</Label>
                   <Input id="name" value={userInfo.name} />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">البريد الإلكتروني</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input id="email" type="email" value={userInfo.email} />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">رقم الهاتف</Label>
+                  <Label htmlFor="phone">Phone Number</Label>
                   <Input id="phone" value={userInfo.phone} />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="location">الموقع</Label>
+                  <Label htmlFor="location">Location</Label>
                   <Input id="location" value={userInfo.location} />
                 </div>
               </div>
               
               <div className="flex justify-end">
                 <Button className="bg-business hover:bg-business-dark">
-                  حفظ التغييرات
+                  Save Changes
                 </Button>
               </div>
             </CardContent>
@@ -144,7 +144,7 @@ const Profile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                معلومات الحساب
+                Account Information
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -154,7 +154,7 @@ const Profile = () => {
                     <Calendar className="w-5 h-5 text-business" />
                   </div>
                   <div>
-                    <p className="font-medium">تاريخ الانضمام</p>
+                    <p className="font-medium">Join Date</p>
                     <p className="text-sm text-gray-600">{userInfo.joinDate}</p>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ const Profile = () => {
                     <Crown className="w-5 h-5 text-profit" />
                   </div>
                   <div>
-                    <p className="font-medium">نوع الاشتراك</p>
+                    <p className="font-medium">Subscription Type</p>
                     <p className="text-sm text-gray-600">{userInfo.subscription}</p>
                   </div>
                 </div>
@@ -183,30 +183,30 @@ const Profile = () => {
                     <Crown className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">اشتراك Premium</h3>
-                    <p className="text-gray-600">جميع الميزات متاحة</p>
+                    <h3 className="text-xl font-bold text-gray-900">Premium Subscription</h3>
+                    <p className="text-gray-600">All features available</p>
                   </div>
                 </div>
-                <Badge className="bg-profit text-white">نشط</Badge>
+                <Badge className="bg-profit text-white">Active</Badge>
               </div>
               
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-600">تاريخ انتهاء الاشتراك</p>
+                  <p className="text-sm text-gray-600">Subscription Expiry Date</p>
                   <p className="font-semibold">{userInfo.subscriptionExpiry}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">الفترة المتبقية</p>
-                  <p className="font-semibold text-profit">11 شهر و 20 يوم</p>
+                  <p className="text-sm text-gray-600">Remaining Period</p>
+                  <p className="font-semibold text-profit">11 months and 20 days</p>
                 </div>
               </div>
               
               <div className="mt-6 flex gap-3">
                 <Button className="bg-business hover:bg-business-dark">
-                  تجديد الاشتراك
+                  Renew Subscription
                 </Button>
                 <Button variant="outline">
-                  عرض الفواتير
+                  View Invoices
                 </Button>
               </div>
             </CardContent>
@@ -214,17 +214,17 @@ const Profile = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>ميزات الاشتراك المتاحة</CardTitle>
+              <CardTitle>Available Subscription Features</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {[
-                  "طلبات غير محدودة",
-                  "منتجات غير محدودة",
-                  "تقارير مفصلة",
-                  "ربط مع Google Sheets",
-                  "دعم فني متقدم",
-                  "نسخ احتياطية تلقائية"
+                  "Unlimited orders",
+                  "Unlimited products",
+                  "Detailed reports",
+                  "Google Sheets integration",
+                  "Advanced technical support",
+                  "Automatic backups"
                 ].map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-profit rounded-full flex items-center justify-center">
@@ -244,15 +244,15 @@ const Profile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="w-5 h-5" />
-                إعدادات الإشعارات
+                Notification Settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {[
-                { id: "orders", label: "إشعارات الطلبات الجديدة", checked: true },
-                { id: "inventory", label: "تنبيهات نفاد المخزون", checked: true },
-                { id: "reports", label: "التقارير الأسبوعية", checked: false },
-                { id: "marketing", label: "العروض والتخفيضات", checked: true }
+                { id: "orders", label: "New order notifications", checked: true },
+                { id: "inventory", label: "Low stock alerts", checked: true },
+                { id: "reports", label: "Weekly reports", checked: false },
+                { id: "marketing", label: "Offers and discounts", checked: true }
               ].map((setting) => (
                 <div key={setting.id} className="flex items-center justify-between">
                   <Label htmlFor={setting.id}>{setting.label}</Label>
@@ -266,21 +266,21 @@ const Profile = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                الأمان والخصوصية
+                Security and Privacy
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button variant="outline" className="w-full justify-start">
-                تغيير كلمة المرور
+                Change Password
               </Button>
               <Button variant="outline" className="w-full justify-start">
-                التحقق بخطوتين
+                Two-Factor Authentication
               </Button>
               <Button variant="outline" className="w-full justify-start">
-                تصدير البيانات
+                Export Data
               </Button>
               <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50">
-                حذف الحساب
+                Delete Account
               </Button>
             </CardContent>
           </Card>

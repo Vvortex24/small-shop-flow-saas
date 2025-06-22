@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -43,10 +44,16 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    // Close sidebar on mobile when a link is clicked
+    setOpenMobile(false);
+  };
 
   return (
-    <Sidebar className="border-r">
-      <SidebarHeader className="border-b px-6 py-4">
+    <Sidebar className="border-r bg-white">
+      <SidebarHeader className="border-b px-6 py-4 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-business flex items-center justify-center">
             <Package className="w-5 h-5 text-white" />
@@ -55,7 +62,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="px-4 py-6">
+      <SidebarContent className="px-4 py-6 bg-white">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
@@ -64,13 +71,13 @@ export function AppSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     className={cn(
-                      "w-full h-12 rounded-lg transition-all duration-200",
+                      "w-full h-12 rounded-lg transition-all duration-200 bg-white hover:bg-gray-100",
                       location.pathname === item.url 
-                        ? "bg-business text-white shadow-md" 
-                        : "hover:bg-gray-100"
+                        ? "bg-business text-white shadow-md hover:bg-business-dark" 
+                        : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
-                    <Link to={item.url} className="flex items-center gap-3 px-4">
+                    <Link to={item.url} className="flex items-center gap-3 px-4" onClick={handleLinkClick}>
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium">{item.title}</span>
                     </Link>
@@ -80,7 +87,7 @@ export function AppSidebar() {
               
               {/* Trash Section */}
               <SidebarMenuItem className="mt-8">
-                <SidebarMenuButton className="w-full h-12 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200">
+                <SidebarMenuButton className="w-full h-12 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 bg-white">
                   <div className="flex items-center gap-3 px-4">
                     <Trash2 className="w-5 h-5" />
                     <span className="font-medium">Trash</span>

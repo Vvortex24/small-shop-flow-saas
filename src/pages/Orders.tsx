@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, Phone, User, ShoppingCart } from "lucide-react";
+import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [productQuantity, setProductQuantity] = useState(1);
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   // Sample order data
   const orders = [
@@ -47,6 +50,39 @@ const Orders = () => {
       notes: "Customer no longer wants the item"
     }
   ];
+
+  // Sample products with quantities
+  const products = [
+    { id: "1", name: "Blue Dress", price: 52000, stock: 5 },
+    { id: "2", name: "Formal Suit", price: 167000, stock: 3 },
+    { id: "3", name: "Handbag", price: 37500, stock: 8 },
+    { id: "4", name: "Red Dress", price: 45000, stock: 0 },
+  ];
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (attachments.length + files.length <= 5) {
+      setAttachments([...attachments, ...files]);
+    } else {
+      alert("Maximum 5 attachments allowed");
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
+  };
+
+  const getSelectedProductStock = () => {
+    const product = products.find(p => p.id === selectedProduct);
+    return product ? product.stock : 0;
+  };
+
+  const getStockColor = () => {
+    const stock = getSelectedProductStock();
+    if (stock === 0) return "text-red-500";
+    if (stock < 5) return "text-yellow-500";
+    return "text-green-500";
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -95,21 +131,88 @@ const Orders = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" placeholder="05xxxxxxxx" />
+                <Input id="phone" placeholder="09xxxxxxxx" />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="items">Products</Label>
-                <Select>
+                <Label htmlFor="products">Products</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select products" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="dress-blue">Blue Dress - 52,000 SYP</SelectItem>
-                    <SelectItem value="suit-formal">Formal Suit - 167,000 SYP</SelectItem>
-                    <SelectItem value="bag-hand">Handbag - 37,500 SYP</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id} disabled={product.stock === 0}>
+                        {product.name} - {product.price.toLocaleString()} SYP (Stock: {product.stock})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {selectedProduct && (
+                  <div className="mt-2">
+                    <p className={`text-sm font-medium ${getStockColor()}`}>
+                      Available: {getSelectedProductStock()} items
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {selectedProduct && (
+                <div className="space-y-2">
+                  <Label htmlFor="quantity">Quantity</Label>
+                  <Input 
+                    id="quantity" 
+                    type="number" 
+                    min="1" 
+                    max={getSelectedProductStock()}
+                    value={productQuantity}
+                    onChange={(e) => setProductQuantity(Number(e.target.value))}
+                    placeholder="Enter quantity"
+                  />
+                  {productQuantity > getSelectedProductStock() && (
+                    <p className="text-red-500 text-xs">Quantity exceeds available stock!</p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Attachments (Max 5 files)</Label>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="file" 
+                    multiple 
+                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <Label htmlFor="file-upload" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="gap-2" asChild>
+                      <span>
+                        <Upload className="w-4 h-4" />
+                        Upload Files
+                      </span>
+                    </Button>
+                  </Label>
+                  <span className="text-sm text-gray-500">{attachments.length}/5</span>
+                </div>
+                {attachments.length > 0 && (
+                  <div className="space-y-1">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="text-sm truncate">{file.name}</span>
+                        <Button 
+                          type="button"
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeAttachment(index)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -117,7 +220,10 @@ const Orders = () => {
                 <Textarea id="notes" placeholder="Any special notes..." rows={3} />
               </div>
               
-              <Button className="w-full bg-profit hover:bg-profit-dark">
+              <Button 
+                className="w-full bg-profit hover:bg-profit-dark"
+                disabled={!selectedProduct || productQuantity > getSelectedProductStock() || productQuantity < 1}
+              >
                 Add Order
               </Button>
             </div>
@@ -197,6 +303,16 @@ const Orders = () => {
                   {getStatusBadge(order.status)}
                   <p className="text-2xl font-bold text-business">{order.total.toLocaleString()} SYP</p>
                   <p className="text-sm text-gray-500">{order.date}</p>
+                  <div className="flex gap-2 justify-end">
+                    <Button size="sm" variant="outline" className="gap-1">
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1 text-red-600 hover:bg-red-50">
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

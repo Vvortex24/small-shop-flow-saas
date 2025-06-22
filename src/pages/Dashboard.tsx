@@ -52,7 +52,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-profit">{totalProfit.toLocaleString()}</div>
-            <p className="text-xs text-green-600 mt-1">Syrian Lira</p>
+            <p className="text-xs text-green-600 mt-1">Syrian Lira in this month</p>
           </CardContent>
         </Card>
 
@@ -66,7 +66,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-expense">{totalExpenses.toLocaleString()}</div>
-            <p className="text-xs text-red-600 mt-1">Syrian Lira</p>
+            <p className="text-xs text-red-600 mt-1">Syrian Lira in this month</p>
           </CardContent>
         </Card>
 
@@ -113,14 +113,14 @@ const Dashboard = () => {
               </Link>
             </Button>
             
-            <Button asChild variant="outline" className="h-20 flex-col gap-2 border-business text-business hover:bg-business-light">
+            <Button asChild className="h-20 flex-col gap-2 bg-purple-600 hover:bg-purple-700 border-purple-600 text-white">
               <Link to="/inventory">
                 <Package className="w-6 h-6" />
                 <span>Add Product</span>
               </Link>
             </Button>
             
-            <Button asChild variant="outline" className="h-20 flex-col gap-2 border-gray-300 hover:bg-gray-50">
+            <Button asChild className="h-20 flex-col gap-2 bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white">
               <Link to="/balance">
                 <DollarSign className="w-6 h-6" />
                 <span>View Reports</span>

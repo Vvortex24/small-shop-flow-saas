@@ -118,7 +118,7 @@ const Inventory = () => {
             <h2 className="text-lg font-semibold">Products Ready for Sale</h2>
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-profit hover:bg-profit-dark gap-2">
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
                   <Plus className="w-4 h-4" />
                   New Product
                 </Button>
@@ -149,7 +149,7 @@ const Inventory = () => {
                     <Textarea id="description" placeholder="Product description..." rows={3} />
                   </div>
                   
-                  <Button className="w-full bg-profit hover:bg-profit-dark">
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
                     Add Product
                   </Button>
                 </div>
