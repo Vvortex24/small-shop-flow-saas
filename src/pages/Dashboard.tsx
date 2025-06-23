@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,12 +6,15 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
 const Dashboard = () => {
-  // Sample data for display
-  const totalBalance = 3275000; // All-time store balance (affected by buying, selling, withdrawing)
+  // Sample data for display - showing a negative balance scenario
+  const totalBalance = -500000; // All-time store balance (affected by buying, selling, withdrawing)
   const totalProfit = 4890000;
   const totalExpenses = 1615000;
   const ordersCount = 145;
   const inventoryCount = 67;
+
+  // Determine if balance is negative
+  const isNegativeBalance = totalBalance < 0;
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -33,17 +37,21 @@ const Dashboard = () => {
       </div>
 
       {/* Main Balance Card */}
-      <Card className="gradient-business text-white border-0 shadow-lg">
+      <Card className={`${isNegativeBalance ? 'bg-gradient-to-br from-red-500 to-red-600' : 'gradient-business'} text-white border-0 shadow-lg`}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm mb-1">Total Balance</p>
-              <p className="text-3xl font-bold text-shadow">{totalBalance.toLocaleString()} SYP</p>
+              <p className={`${isNegativeBalance ? 'text-red-100' : 'text-blue-100'} text-sm mb-1`}>Total Balance</p>
+              <p className={`text-3xl font-bold text-shadow ${isNegativeBalance ? 'text-red-50' : 'text-white'}`}>
+                {isNegativeBalance ? '-' : ''}{Math.abs(totalBalance).toLocaleString()} SYP
+              </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-blue-200 text-sm">All-time store balance</span>
+                <span className={`${isNegativeBalance ? 'text-red-200' : 'text-blue-200'} text-sm`}>
+                  All-time store balance
+                </span>
               </div>
             </div>
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+            <div className={`w-16 h-16 ${isNegativeBalance ? 'bg-white/20' : 'bg-white/20'} rounded-full flex items-center justify-center`}>
               <DollarSign className="w-8 h-8" />
             </div>
           </div>
