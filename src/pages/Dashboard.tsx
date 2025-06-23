@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,11 @@ import { useEffect } from "react";
 
 const Dashboard = () => {
   // Sample data for display
-  const totalBalance = 3275000; // in Syrian Lira
+  const totalBalance = 3275000; // All-time store balance (affected by buying, selling, withdrawing)
   const totalProfit = 4890000;
   const totalExpenses = 1615000;
   const ordersCount = 145;
   const inventoryCount = 67;
-  const profitPercentage = 12.5;
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -42,8 +40,7 @@ const Dashboard = () => {
               <p className="text-blue-100 text-sm mb-1">Total Balance</p>
               <p className="text-3xl font-bold text-shadow">{totalBalance.toLocaleString()} SYP</p>
               <div className="flex items-center gap-2 mt-2">
-                <TrendingUp className="w-4 h-4 text-green-300" />
-                <span className="text-green-300 text-sm font-medium">+{profitPercentage}% this month</span>
+                <span className="text-blue-200 text-sm">All-time store balance</span>
               </div>
             </div>
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
