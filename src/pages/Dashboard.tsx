@@ -30,7 +30,7 @@ const Dashboard = () => {
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Welcome Message */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Ahmad Mohammed! 👋</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome! 👋</h1>
         <p className="text-gray-600">Here's your store activity summary for today</p>
       </div>
 

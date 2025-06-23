@@ -1,10 +1,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Calendar, Minus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 
 const Balance = () => {
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawNote, setWithdrawNote] = useState("");
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  
   // Sample data
   const totalBalance = 3275000; // in Syrian Lira
   const totalProfit = 4890000;
@@ -70,6 +79,15 @@ const Balance = () => {
     { month: "April", profit: 4475000, expense: 1500000 },
   ];
 
+  const handleWithdraw = () => {
+    if (withdrawAmount && parseFloat(withdrawAmount) > 0) {
+      console.log(`Withdrew ${withdrawAmount} SYP: ${withdrawNote}`);
+      setWithdrawAmount("");
+      setWithdrawNote("");
+      setIsWithdrawOpen(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
@@ -79,18 +97,61 @@ const Balance = () => {
           <p className="text-gray-600 mt-1">Track profits and expenses</p>
         </div>
         
-        <Select defaultValue="current-month">
-          <SelectTrigger className="w-48">
-            <Calendar className="w-4 h-4 mr-2" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="current-month">Current Month</SelectItem>
-            <SelectItem value="last-month">Last Month</SelectItem>
-            <SelectItem value="quarter">Last 3 Months</SelectItem>
-            <SelectItem value="year">Current Year</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                <Minus className="w-4 h-4 mr-2" />
+                Withdraw
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Withdraw Money</DialogTitle>
+                <DialogDescription>
+                  Record a withdrawal from your profits
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="withdraw-amount">Amount (SYP)</Label>
+                  <Input
+                    id="withdraw-amount"
+                    type="number"
+                    placeholder="Enter amount..."
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="withdraw-note">Note (Optional)</Label>
+                  <Input
+                    id="withdraw-note"
+                    placeholder="Reason for withdrawal..."
+                    value={withdrawNote}
+                    onChange={(e) => setWithdrawNote(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleWithdraw} className="w-full">
+                  Confirm Withdrawal
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <Select defaultValue="current-month">
+            <SelectTrigger className="w-48">
+              <Calendar className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="current-month">Current Month</SelectItem>
+              <SelectItem value="last-month">Last Month</SelectItem>
+              <SelectItem value="quarter">Last 3 Months</SelectItem>
+              <SelectItem value="year">Current Year</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Main Balance Cards */}

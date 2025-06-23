@@ -40,6 +40,11 @@ const menuItems = [
     url: "/profile",
     icon: User,
   },
+  {
+    title: "Trash",
+    url: "/trash",
+    icon: Trash2,
+  },
 ];
 
 export function AppSidebar() {
@@ -49,6 +54,10 @@ export function AppSidebar() {
   const handleLinkClick = () => {
     // Close sidebar on mobile when a link is clicked
     setOpenMobile(false);
+    // Scroll to top when navigating
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
   };
 
   return (
@@ -58,7 +67,10 @@ export function AppSidebar() {
           <div className="w-8 h-8 rounded-lg bg-business flex items-center justify-center">
             <Package className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-business">MyStore</span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-business">Mashaytak</span>
+            <span className="text-xs text-gray-400 opacity-60">store manager</span>
+          </div>
         </div>
       </SidebarHeader>
       
@@ -74,6 +86,8 @@ export function AppSidebar() {
                       "w-full h-12 rounded-lg transition-all duration-200 bg-white hover:bg-gray-100",
                       location.pathname === item.url 
                         ? "bg-business text-white shadow-md hover:bg-business-dark" 
+                        : item.title === "Trash"
+                        ? "text-gray-500 hover:bg-red-50 hover:text-red-600"
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
@@ -84,16 +98,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              
-              {/* Trash Section */}
-              <SidebarMenuItem className="mt-8">
-                <SidebarMenuButton className="w-full h-12 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 bg-white">
-                  <div className="flex items-center gap-3 px-4">
-                    <Trash2 className="w-5 h-5" />
-                    <span className="font-medium">Trash</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
