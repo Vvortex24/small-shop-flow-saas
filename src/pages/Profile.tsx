@@ -37,11 +37,11 @@ const Profile = () => {
 
       {/* Profile Overview */}
       <Card className="overflow-hidden">
-        <div className="h-24 gradient-business"></div>
+        <div className="h-24 bg-gradient-to-r from-blue-500 to-blue-600"></div>
         <CardContent className="relative pt-0 pb-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-12">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-              <AvatarImage src="" />
+              <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="bg-business text-white text-2xl font-bold">AM</AvatarFallback>
             </Avatar>
             
@@ -51,7 +51,7 @@ const Profile = () => {
                   <h2 className="text-2xl font-bold text-gray-900">{userInfo.name}</h2>
                   <p className="text-gray-600">{userInfo.email}</p>
                 </div>
-                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 gap-1 w-fit mx-auto sm:mx-0">
+                <Badge className="bg-business text-white border-business hover:bg-business-dark gap-1 w-fit mx-auto sm:mx-0">
                   <Crown className="w-4 h-4" />
                   {userInfo.subscription}
                 </Badge>
@@ -160,8 +160,8 @@ const Profile = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-profit-light rounded-lg flex items-center justify-center">
-                    <Crown className="w-5 h-5 text-profit" />
+                  <div className="w-10 h-10 bg-business-light rounded-lg flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-business" />
                   </div>
                   <div>
                     <p className="font-medium">Subscription Type</p>
@@ -175,11 +175,11 @@ const Profile = () => {
 
         {/* Subscription Tab */}
         <TabsContent value="subscription" className="space-y-6">
-          <Card className="border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
+          <Card className="border-business/20 bg-gradient-to-br from-blue-50 to-indigo-50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-business rounded-xl flex items-center justify-center">
                     <Crown className="w-6 h-6 text-white" />
                   </div>
                   <div>

@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Calendar, Minus, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,10 @@ import { useState } from "react";
 
 const Balance = () => {
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawName, setWithdrawName] = useState("");
   const [withdrawNote, setWithdrawNote] = useState("");
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [transactionFilter, setTransactionFilter] = useState("all");
   
   // Sample data
   const totalBalance = 3275000; // in Syrian Lira
@@ -21,7 +23,7 @@ const Balance = () => {
   const profitPercentage = 67.0;
   const expensePercentage = 33.0;
 
-  // Financial transactions log
+  // Financial transactions log with withdraw entries
   const transactions = [
     {
       id: "1",
@@ -41,6 +43,16 @@ const Balance = () => {
     },
     {
       id: "3",
+      type: "withdraw",
+      amount: 100000,
+      name: "Personal expenses",
+      description: "Monthly personal allowance",
+      date: "2024-01-19",
+      time: "18:00",
+      note: "Monthly withdrawal for personal use"
+    },
+    {
+      id: "4",
       type: "profit", 
       amount: 250000,
       description: "Order from Mohammed Ali - Formal suit",
@@ -48,7 +60,7 @@ const Balance = () => {
       time: "16:45"
     },
     {
-      id: "4",
+      id: "5",
       type: "expense",
       amount: 31300,
       description: "Shipping and delivery costs",
@@ -56,7 +68,7 @@ const Balance = () => {
       time: "12:20"
     },
     {
-      id: "5",
+      id: "6",
       type: "profit",
       amount: 135000,
       description: "Order from Fatima Khaled - Handbag",
@@ -80,11 +92,60 @@ const Balance = () => {
   ];
 
   const handleWithdraw = () => {
-    if (withdrawAmount && parseFloat(withdrawAmount) > 0) {
-      console.log(`Withdrew ${withdrawAmount} SYP: ${withdrawNote}`);
+    if (withdrawAmount && parseFloat(withdrawAmount) > 0 && withdrawName.trim()) {
+      console.log(`Withdrew ${withdrawAmount} SYP by ${withdrawName}: ${withdrawNote}`);
       setWithdrawAmount("");
+      setWithdrawName("");
       setWithdrawNote("");
       setIsWithdrawOpen(false);
+    }
+  };
+
+  // Filter transactions based on selected filter
+  const filteredTransactions = transactions.filter(transaction => {
+    if (transactionFilter === "all") return true;
+    if (transactionFilter === "profits") return transaction.type === "profit";
+    if (transactionFilter === "expenses") return transaction.type === "expense";
+    if (transactionFilter === "withdraws") return transaction.type === "withdraw";
+    return true;
+  });
+
+  const getTransactionIcon = (type) => {
+    switch (type) {
+      case 'profit':
+        return <TrendingUp className="w-5 h-5 text-profit" />;
+      case 'expense':
+        return <TrendingDown className="w-5 h-5 text-expense" />;
+      case 'withdraw':
+        return <Minus className="w-5 h-5 text-orange-600" />;
+      default:
+        return <DollarSign className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  const getTransactionColor = (type) => {
+    switch (type) {
+      case 'profit':
+        return 'text-profit';
+      case 'expense':
+        return 'text-expense';
+      case 'withdraw':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  const getTransactionBgColor = (type) => {
+    switch (type) {
+      case 'profit':
+        return 'bg-profit-light';
+      case 'expense':
+        return 'bg-expense-light';
+      case 'withdraw':
+        return 'bg-orange-100';
+      default:
+        return 'bg-gray-100';
     }
   };
 
@@ -114,25 +175,40 @@ const Balance = () => {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="withdraw-amount">Amount (SYP)</Label>
+                  <Label htmlFor="withdraw-name">Withdrawal Name *</Label>
+                  <Input
+                    id="withdraw-name"
+                    placeholder="e.g., Personal expenses, Business investment..."
+                    value={withdrawName}
+                    onChange={(e) => setWithdrawName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="withdraw-amount">Amount (SYP) *</Label>
                   <Input
                     id="withdraw-amount"
                     type="number"
                     placeholder="Enter amount..."
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
+                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="withdraw-note">Note (Optional)</Label>
                   <Input
                     id="withdraw-note"
-                    placeholder="Reason for withdrawal..."
+                    placeholder="Additional details..."
                     value={withdrawNote}
                     onChange={(e) => setWithdrawNote(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleWithdraw} className="w-full">
+                <Button 
+                  onClick={handleWithdraw} 
+                  className="w-full"
+                  disabled={!withdrawName.trim() || !withdrawAmount || parseFloat(withdrawAmount) <= 0}
+                >
                   Confirm Withdrawal
                 </Button>
               </div>
@@ -270,30 +346,50 @@ const Balance = () => {
         <TabsContent value="transactions" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Recent Financial Transactions</CardTitle>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardTitle className="text-lg">Recent Financial Transactions</CardTitle>
+                <Select value={transactionFilter} onValueChange={setTransactionFilter}>
+                  <SelectTrigger className="w-48">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Transactions</SelectItem>
+                    <SelectItem value="profits">Profits Only</SelectItem>
+                    <SelectItem value="expenses">Expenses Only</SelectItem>
+                    <SelectItem value="withdraws">Withdrawals Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {transactions.map((transaction) => (
+                {filteredTransactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between py-3 border-b last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        transaction.type === 'profit' ? 'bg-profit-light' : 'bg-expense-light'
-                      }`}>
-                        {transaction.type === 'profit' ? 
-                          <TrendingUp className="w-5 h-5 text-profit" /> : 
-                          <TrendingDown className="w-5 h-5 text-expense" />
-                        }
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTransactionBgColor(transaction.type)}`}>
+                        {getTransactionIcon(transaction.type)}
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{transaction.description}</p>
-                        <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
+                        {transaction.type === 'withdraw' ? (
+                          <>
+                            <p className="font-medium text-sm">{transaction.name}</p>
+                            <p className="text-xs text-gray-500">{transaction.description}</p>
+                            {transaction.note && (
+                              <p className="text-xs text-gray-400 italic">Note: {transaction.note}</p>
+                            )}
+                            <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-medium text-sm">{transaction.description}</p>
+                            <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`text-lg font-bold ${
-                        transaction.type === 'profit' ? 'text-profit' : 'text-expense'
-                      }`}>
+                      <span className={`text-lg font-bold ${getTransactionColor(transaction.type)}`}>
                         {transaction.type === 'profit' ? '+' : '-'}{transaction.amount.toLocaleString()} SYP
                       </span>
                     </div>

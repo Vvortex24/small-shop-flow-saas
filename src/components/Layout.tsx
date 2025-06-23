@@ -24,7 +24,7 @@ const Layout = () => {
           <div className="flex items-center gap-4">
             <Button variant="outline" size="sm" className="text-business border-business hover:bg-business-light flex items-center gap-2">
               <Crown className="w-4 h-4" />
-              My Plan
+              Subscription
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
