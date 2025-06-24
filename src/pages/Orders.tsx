@@ -177,13 +177,13 @@ const Orders = () => {
       
       // Show success message with green checkmark
       toast({
-        title: (
+        title: "Thank You!",
+        description: (
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
-            <span>Thank You!</span>
+            <span>Your order has been successfully submitted. We'll process it shortly.</span>
           </div>
         ),
-        description: "Your order has been successfully submitted. We'll process it shortly.",
         className: "border-green-200 bg-green-50",
       });
 
