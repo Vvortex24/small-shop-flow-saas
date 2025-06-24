@@ -41,8 +41,8 @@ const Profile = () => {
         <CardContent className="relative pt-0 pb-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-12">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-              <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback className="bg-business text-white text-2xl font-bold">AM</AvatarFallback>
+              <AvatarImage src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face" />
+              <AvatarFallback className="bg-business text-white text-4xl">🌳</AvatarFallback>
             </Avatar>
             
             <div className="flex-1 text-center sm:text-left space-y-2">

@@ -12,7 +12,7 @@ const Layout = () => {
       <AppSidebar />
       <main className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 border-b bg-white flex items-center justify-between px-4 lg:px-6">
+        <header className="h-16 border-b bg-white flex items-center justify-between px-4 lg:px-6" style={{ borderBottomWidth: '1px' }}>
           <div className="flex items-center gap-4">
             <SidebarTrigger className="lg:hidden" />
             <div className="hidden lg:block">
@@ -28,9 +28,9 @@ const Layout = () => {
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg" />
+                <AvatarImage src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face" />
                 <AvatarFallback className="bg-business text-white">
-                  <img src="/placeholder.svg" alt="Profile" className="w-full h-full object-cover" />
+                  🌳
                 </AvatarFallback>
               </Avatar>
             </div>

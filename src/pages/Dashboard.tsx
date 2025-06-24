@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Package, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -30,10 +31,21 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      {/* Welcome Message */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome! 👋</h1>
-        <p className="text-gray-600">Here's your store activity summary for today</p>
+      {/* Welcome Message with Profile */}
+      <div className="flex items-center justify-between border-b pb-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome! 👋</h1>
+          <p className="text-gray-600">Here's your store activity summary</p>
+        </div>
+        
+        <Link to="/profile">
+          <Avatar className="h-16 w-16 cursor-pointer hover:ring-4 hover:ring-business/20 transition-all duration-200">
+            <AvatarImage src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face" />
+            <AvatarFallback className="bg-business text-white text-xl font-bold">
+              🌳
+            </AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
 
       {/* Main Balance Card */}

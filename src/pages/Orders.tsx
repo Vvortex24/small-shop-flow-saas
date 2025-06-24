@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload } from "lucide-react";
+import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, MapPin, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,9 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [productQuantity, setProductQuantity] = useState(1);
+  const [selectedProducts, setSelectedProducts] = useState<{id: string, quantity: number}[]>([]);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [customerName, setCustomerName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [shippingLocation, setShippingLocation] = useState("");
+  const [deadline, setDeadline] = useState("");
 
   // Sample order data
   const orders = [
@@ -26,7 +30,9 @@ const Orders = () => {
       status: "completed",
       date: "2024-01-20",
       items: ["Blue Dress", "Handbag"],
-      notes: "Express delivery"
+      notes: "Express delivery",
+      location: "Damascus",
+      deadline: "2024-01-25"
     },
     {
       id: "002", 
@@ -36,7 +42,9 @@ const Orders = () => {
       status: "pending",
       date: "2024-01-19",
       items: ["Formal Suit", "Leather Belt"],
-      notes: ""
+      notes: "",
+      location: "Aleppo",
+      deadline: "2024-01-30"
     },
     {
       id: "003",
@@ -46,7 +54,9 @@ const Orders = () => {
       status: "cancelled",
       date: "2024-01-18",
       items: ["Red Dress"],
-      notes: "Customer no longer wants the item"
+      notes: "Customer no longer wants the item",
+      location: "Homs",
+      deadline: ""
     }
   ];
 
@@ -56,7 +66,23 @@ const Orders = () => {
     { id: "2", name: "Formal Suit", price: 167000, stock: 3 },
     { id: "3", name: "Handbag", price: 37500, stock: 8 },
     { id: "4", name: "Red Dress", price: 45000, stock: 0 },
+    { id: "5", name: "Leather Belt", price: 25000, stock: 12 },
+    { id: "6", name: "White Shirt", price: 35000, stock: 7 },
   ];
+
+  const addProductToOrder = () => {
+    setSelectedProducts([...selectedProducts, { id: "", quantity: 1 }]);
+  };
+
+  const removeProductFromOrder = (index: number) => {
+    setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
+  };
+
+  const updateSelectedProduct = (index: number, productId: string, quantity: number) => {
+    const updated = [...selectedProducts];
+    updated[index] = { id: productId, quantity };
+    setSelectedProducts(updated);
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -71,16 +97,26 @@ const Orders = () => {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
-  const getSelectedProductStock = () => {
-    const product = products.find(p => p.id === selectedProduct);
+  const getProductStock = (productId: string) => {
+    const product = products.find(p => p.id === productId);
     return product ? product.stock : 0;
   };
 
-  const getStockColor = () => {
-    const stock = getSelectedProductStock();
-    if (stock === 0) return "text-red-500";
-    if (stock < 5) return "text-yellow-500";
-    return "text-green-500";
+  const canPlaceOrder = () => {
+    return customerName.trim() !== "" && 
+           phoneNumber.trim() !== "" && 
+           shippingLocation.trim() !== "" && 
+           selectedProducts.length > 0 && 
+           selectedProducts.every(sp => sp.id !== "" && sp.quantity > 0 && sp.quantity <= getProductStock(sp.id));
+  };
+
+  const resetForm = () => {
+    setCustomerName("");
+    setPhoneNumber("");
+    setShippingLocation("");
+    setDeadline("");
+    setSelectedProducts([]);
+    setAttachments([]);
   };
 
   const getStatusBadge = (status: string) => {
@@ -118,61 +154,131 @@ const Orders = () => {
               New Order
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-lg">Add New Order</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="customer">Customer Name</Label>
-                <Input id="customer" placeholder="Enter customer name" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" placeholder="09xxxxxxxx" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="products">Products</Label>
-                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select products" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id} disabled={product.stock === 0}>
-                        {product.name} - {product.price.toLocaleString()} SYP (Stock: {product.stock})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedProduct && (
-                  <div className="mt-2">
-                    <p className={`text-sm font-medium ${getStockColor()}`}>
-                      Available: {getSelectedProductStock()} items
-                    </p>
-                  </div>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customer">Customer Name *</Label>
+                  <Input 
+                    id="customer" 
+                    placeholder="Enter customer name" 
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input 
+                    id="phone" 
+                    placeholder="09xxxxxxxx" 
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
 
-              {selectedProduct && (
-                <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantity</Label>
+              <div className="space-y-2">
+                <Label htmlFor="location">To Where *</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                   <Input 
-                    id="quantity" 
-                    type="number" 
-                    min="1" 
-                    max={getSelectedProductStock()}
-                    value={productQuantity}
-                    onChange={(e) => setProductQuantity(Number(e.target.value))}
-                    placeholder="Enter quantity"
+                    id="location" 
+                    placeholder="Enter shipping location" 
+                    value={shippingLocation}
+                    onChange={(e) => setShippingLocation(e.target.value)}
+                    className="pl-9"
+                    required
                   />
-                  {productQuantity > getSelectedProductStock() && (
-                    <p className="text-red-500 text-xs">Quantity exceeds available stock!</p>
-                  )}
                 </div>
-              )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="deadline">Deadline (Optional)</Label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input 
+                    id="deadline" 
+                    type="date"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Products *</Label>
+                  <Button type="button" onClick={addProductToOrder} size="sm" variant="outline">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Product
+                  </Button>
+                </div>
+                
+                {selectedProducts.length === 0 && (
+                  <p className="text-sm text-gray-500">Click "Add Product" to select products for this order.</p>
+                )}
+
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {selectedProducts.map((selectedProduct, index) => (
+                    <div key={index} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Product {index + 1}</Label>
+                        <Button 
+                          type="button"
+                          onClick={() => removeProductFromOrder(index)}
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select 
+                          value={selectedProduct.id} 
+                          onValueChange={(value) => updateSelectedProduct(index, value, selectedProduct.quantity)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((product) => (
+                              <SelectItem 
+                                key={product.id} 
+                                value={product.id} 
+                                disabled={product.stock === 0}
+                              >
+                                {product.name} - {product.price.toLocaleString()} SYP (Stock: {product.stock})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          max={getProductStock(selectedProduct.id)}
+                          value={selectedProduct.quantity}
+                          onChange={(e) => updateSelectedProduct(index, selectedProduct.id, Number(e.target.value))}
+                          placeholder="Qty"
+                        />
+                      </div>
+                      
+                      {selectedProduct.id && selectedProduct.quantity > getProductStock(selectedProduct.id) && (
+                        <p className="text-red-500 text-xs">Quantity exceeds available stock!</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <Label>Attachments (Max 5 files)</Label>
@@ -219,12 +325,27 @@ const Orders = () => {
                 <Textarea id="notes" placeholder="Any special notes..." rows={3} />
               </div>
               
-              <Button 
-                className="w-full bg-profit hover:bg-profit-dark"
-                disabled={!selectedProduct || productQuantity > getSelectedProductStock() || productQuantity < 1}
-              >
-                Add Order
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1 bg-profit hover:bg-profit-dark"
+                  disabled={!canPlaceOrder()}
+                >
+                  Add Order
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                >
+                  Reset
+                </Button>
+              </div>
+              
+              {!canPlaceOrder() && (
+                <p className="text-sm text-red-600 text-center">
+                  Please fill in all required fields: Customer Name, Phone Number, Shipping Location, and at least one Product.
+                </p>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -278,6 +399,20 @@ const Orders = () => {
                         {order.phone}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="mb-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <MapPin className="w-4 h-4" />
+                      <span>To: {order.location}</span>
+                    </div>
+                    
+                    {order.deadline && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4" />
+                        <span>Deadline: {order.deadline}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="mb-3">
