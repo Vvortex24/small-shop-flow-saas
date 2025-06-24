@@ -9,6 +9,7 @@ import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +20,9 @@ const Orders = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shippingLocation, setShippingLocation] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   // Sample order data
   const orders = [
@@ -102,12 +106,93 @@ const Orders = () => {
     return product ? product.stock : 0;
   };
 
+  const getProductPrice = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    return product ? product.price : 0;
+  };
+
+  const calculateTotalPrice = () => {
+    return selectedProducts.reduce((total, sp) => {
+      const price = getProductPrice(sp.id);
+      return total + (price * sp.quantity);
+    }, 0);
+  };
+
   const canPlaceOrder = () => {
     return customerName.trim() !== "" && 
            phoneNumber.trim() !== "" && 
            shippingLocation.trim() !== "" && 
            selectedProducts.length > 0 && 
            selectedProducts.every(sp => sp.id !== "" && sp.quantity > 0 && sp.quantity <= getProductStock(sp.id));
+  };
+
+  const sendWebhook = async (orderData: any) => {
+    try {
+      const webhookUrl = "https://a7mad227.app.n8n.cloud/webhook-test/c385dc19-529e-4315-847e-561a1dc1e15c";
+      
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors",
+        body: JSON.stringify(orderData),
+      });
+
+      console.log("Webhook sent successfully:", orderData);
+    } catch (error) {
+      console.error("Error sending webhook:", error);
+    }
+  };
+
+  const handleAddOrder = async () => {
+    if (!canPlaceOrder()) return;
+
+    setIsSubmitting(true);
+
+    // Prepare order data
+    const orderData = {
+      customerName,
+      phoneNumber,
+      shippingLocation,
+      deadline: deadline || null,
+      products: selectedProducts.map(sp => {
+        const product = products.find(p => p.id === sp.id);
+        return {
+          id: sp.id,
+          name: product?.name,
+          price: product?.price,
+          quantity: sp.quantity,
+          total: (product?.price || 0) * sp.quantity
+        };
+      }),
+      attachments: attachments.map(file => file.name),
+      notes,
+      totalPrice: calculateTotalPrice(),
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      // Send webhook
+      await sendWebhook(orderData);
+      
+      // Show success message
+      toast({
+        title: "Order Added Successfully",
+        description: "Order has been created and webhook sent.",
+      });
+
+      // Reset form
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -117,6 +202,7 @@ const Orders = () => {
     setDeadline("");
     setSelectedProducts([]);
     setAttachments([]);
+    setNotes("");
   };
 
   const getStatusBadge = (status: string) => {
@@ -275,9 +361,27 @@ const Orders = () => {
                       {selectedProduct.id && selectedProduct.quantity > getProductStock(selectedProduct.id) && (
                         <p className="text-red-500 text-xs">Quantity exceeds available stock!</p>
                       )}
+                      
+                      {selectedProduct.id && (
+                        <p className="text-sm text-gray-600">
+                          Subtotal: {(getProductPrice(selectedProduct.id) * selectedProduct.quantity).toLocaleString()} SYP
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
+                
+                {/* Real-time Total Price */}
+                {selectedProducts.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-blue-900">Total Order Price:</span>
+                      <span className="text-xl font-bold text-blue-900">
+                        {calculateTotalPrice().toLocaleString()} SYP
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -322,20 +426,28 @@ const Orders = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" placeholder="Any special notes..." rows={3} />
+                <Textarea 
+                  id="notes" 
+                  placeholder="Any special notes..." 
+                  rows={3} 
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
               </div>
               
               <div className="flex gap-2">
                 <Button 
                   className="flex-1 bg-profit hover:bg-profit-dark"
-                  disabled={!canPlaceOrder()}
+                  disabled={!canPlaceOrder() || isSubmitting}
+                  onClick={handleAddOrder}
                 >
-                  Add Order
+                  {isSubmitting ? "Adding Order..." : "Add Order"}
                 </Button>
                 <Button 
                   type="button"
                   variant="outline"
                   onClick={resetForm}
+                  disabled={isSubmitting}
                 >
                   Reset
                 </Button>

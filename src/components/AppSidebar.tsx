@@ -86,8 +86,6 @@ export function AppSidebar() {
                       "w-full h-12 rounded-lg transition-all duration-200 bg-white hover:bg-gray-100",
                       location.pathname === item.url 
                         ? "bg-business text-white shadow-md hover:bg-business-dark" 
-                        : item.title === "Trash"
-                        ? "text-gray-500 hover:bg-red-50 hover:text-red-600"
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
