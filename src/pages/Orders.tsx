@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, MapPin, Calendar } from "lucide-react";
+import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, MapPin, Calendar, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,7 +127,7 @@ const Orders = () => {
 
   const sendWebhook = async (orderData: any) => {
     try {
-      const webhookUrl = "https://a7mad227.app.n8n.cloud/webhook-test/c385dc19-529e-4315-847e-561a1dc1e15c";
+      const webhookUrl = "https://a7mad227.app.n8n.cloud/webhook-test/Mashytak";
       
       const response = await fetch(webhookUrl, {
         method: "POST",
@@ -176,10 +175,16 @@ const Orders = () => {
       // Send webhook
       await sendWebhook(orderData);
       
-      // Show success message
+      // Show success message with green checkmark
       toast({
-        title: "Order Added Successfully",
-        description: "Order has been created and webhook sent.",
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <span>Thank You!</span>
+          </div>
+        ),
+        description: "Your order has been successfully submitted. We'll process it shortly.",
+        className: "border-green-200 bg-green-50",
       });
 
       // Reset form
@@ -187,7 +192,7 @@ const Orders = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add order. Please try again.",
+        description: "Failed to submit order. Please try again.",
         variant: "destructive",
       });
     } finally {
