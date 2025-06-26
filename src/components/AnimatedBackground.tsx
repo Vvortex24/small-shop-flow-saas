@@ -65,37 +65,6 @@ const AnimatedBackground = () => {
           />
         ))}
       </div>
-      
-      <style jsx>{`
-        @keyframes float1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(30px, -30px) scale(1.1); }
-          50% { transform: translate(-20px, -60px) scale(0.9); }
-          75% { transform: translate(-40px, -20px) scale(1.05); }
-        }
-        
-        @keyframes float2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-40px, 40px) scale(1.15); }
-          66% { transform: translate(20px, -50px) scale(0.85); }
-        }
-        
-        @keyframes float3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(60px, -80px) scale(1.2); }
-        }
-        
-        @keyframes float4 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(-50px, 30px) scale(0.9); }
-          75% { transform: translate(40px, -40px) scale(1.1); }
-        }
-        
-        @keyframes float5 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-30px, 50px) scale(1.3); }
-        }
-      `}</style>
     </div>
   );
 };
