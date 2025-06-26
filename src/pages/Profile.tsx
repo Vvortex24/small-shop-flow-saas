@@ -8,24 +8,100 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { User, Phone, Mail, MapPin, Calendar, Crown, Settings, Bell, Shield } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
-  const userInfo = {
-    name: "Ahmad Mohammed Al-Saadi",
-    email: "ahmed.mohammed@email.com",
-    phone: "0551234567",
-    location: "Riyadh, Saudi Arabia",
-    joinDate: "2024-01-01",
-    subscription: "Premium",
-    subscriptionExpiry: "2024-12-31"
+  const { user } = useAuth();
+  const { profile, updateProfile } = useProfile();
+  const { toast } = useToast();
+  const [name, setName] = useState('');
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0,
+    activeDays: 0,
+    avgOrderValue: 0
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name);
+      fetchUserStats();
+    }
+  }, [profile, user]);
+
+  const fetchUserStats = async () => {
+    try {
+      // Fetch orders
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user?.id);
+
+      // Fetch transactions
+      const { data: transactions } = await supabase
+        .from('financial_transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('type', 'income');
+
+      const totalOrders = orders?.length || 0;
+      const totalRevenue = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+      
+      // Calculate active days (days since account creation)
+      const joinDate = new Date(user?.created_at || '');
+      const today = new Date();
+      const activeDays = Math.floor((today.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      setStats({
+        totalOrders,
+        totalRevenue,
+        activeDays: Math.max(1, activeDays),
+        avgOrderValue: Math.round(avgOrderValue)
+      });
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    }
   };
 
-  const businessStats = {
-    totalOrders: 145,
-    totalRevenue: 23500,
-    activeDays: 45,
-    avgOrderValue: 162
+  const handleSaveProfile = async () => {
+    try {
+      const { error } = await updateProfile({ name });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update profile",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Profile updated successfully"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive"
+      });
+    }
   };
+
+  if (!profile) {
+    return (
+      <div className="p-6 space-y-6 animate-fade-in">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -42,18 +118,20 @@ const Profile = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-12">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
               <AvatarImage src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face" />
-              <AvatarFallback className="bg-business text-white text-4xl">🌳</AvatarFallback>
+              <AvatarFallback className="bg-business text-white text-4xl">
+                {profile.name?.charAt(0) || '👤'}
+              </AvatarFallback>
             </Avatar>
             
             <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{userInfo.name}</h2>
-                  <p className="text-gray-600">{userInfo.email}</p>
+                  <h2 className="text-2xl font-bold text-gray-900">{profile.name}</h2>
+                  <p className="text-gray-600">{profile.email}</p>
                 </div>
                 <Badge className="bg-business text-white border-business hover:bg-business-dark gap-1 w-fit mx-auto sm:mx-0">
                   <Crown className="w-4 h-4" />
-                  {userInfo.subscription}
+                  Free Plan
                 </Badge>
               </div>
             </div>
@@ -65,28 +143,28 @@ const Profile = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-business">{businessStats.totalOrders}</p>
+            <p className="text-2xl font-bold text-business">{stats.totalOrders}</p>
             <p className="text-sm text-gray-600">Total Orders</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-profit">{businessStats.totalRevenue.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-profit">{stats.totalRevenue.toLocaleString()}</p>
             <p className="text-sm text-gray-600">Total Revenue</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-business">{businessStats.activeDays}</p>
+            <p className="text-2xl font-bold text-business">{stats.activeDays}</p>
             <p className="text-sm text-gray-600">Active Days</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-orange-600">{businessStats.avgOrderValue}</p>
+            <p className="text-2xl font-bold text-orange-600">{stats.avgOrderValue}</p>
             <p className="text-sm text-gray-600">Avg Order Value</p>
           </CardContent>
         </Card>
@@ -94,9 +172,8 @@ const Profile = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="info" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="info">Personal Information</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         
@@ -113,27 +190,24 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" value={userInfo.name} />
+                  <Input 
+                    id="name" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" value={userInfo.email} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" value={userInfo.phone} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input id="location" value={userInfo.location} />
+                  <Input id="email" type="email" value={profile.email || ''} disabled />
                 </div>
               </div>
               
               <div className="flex justify-end">
-                <Button className="bg-business hover:bg-business-dark">
+                <Button 
+                  className="bg-business hover:bg-business-dark"
+                  onClick={handleSaveProfile}
+                >
                   Save Changes
                 </Button>
               </div>
@@ -155,7 +229,9 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="font-medium">Join Date</p>
-                    <p className="text-sm text-gray-600">{userInfo.joinDate}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(user?.created_at || '').toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
                 
@@ -165,74 +241,9 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="font-medium">Subscription Type</p>
-                    <p className="text-sm text-gray-600">{userInfo.subscription}</p>
+                    <p className="text-sm text-gray-600">Free Plan</p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Subscription Tab */}
-        <TabsContent value="subscription" className="space-y-6">
-          <Card className="border-business/20 bg-gradient-to-br from-blue-50 to-indigo-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-business rounded-xl flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">Premium Subscription</h3>
-                    <p className="text-gray-600">All features available</p>
-                  </div>
-                </div>
-                <Badge className="bg-profit text-white">Active</Badge>
-              </div>
-              
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Subscription Expiry Date</p>
-                  <p className="font-semibold">{userInfo.subscriptionExpiry}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Remaining Period</p>
-                  <p className="font-semibold text-profit">11 months and 20 days</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 flex gap-3">
-                <Button className="bg-business hover:bg-business-dark">
-                  Renew Subscription
-                </Button>
-                <Button variant="outline">
-                  View Invoices
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Subscription Features</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  "Unlimited orders",
-                  "Unlimited products",
-                  "Detailed reports",
-                  "Google Sheets integration",
-                  "Advanced technical support",
-                  "Automatic backups"
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-profit rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">✓</span>
-                    </div>
-                    <span>{feature}</span>
-                  </div>
-                ))}
               </div>
             </CardContent>
           </Card>

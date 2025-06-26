@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
@@ -12,7 +13,9 @@ import Inventory from "./pages/Inventory";
 import Balance from "./pages/Balance";
 import Profile from "./pages/Profile";
 import Trash from "./pages/Trash";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +25,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
+        <AuthProvider>
           <div className="min-h-screen flex w-full">
             <Routes>
-              <Route path="/" element={<Layout />}>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <SidebarProvider>
+                    <Layout />
+                  </SidebarProvider>
+                </ProtectedRoute>
+              }>
                 <Route index element={<Dashboard />} />
                 <Route path="orders" element={<Orders />} />
                 <Route path="inventory" element={<Inventory />} />
@@ -33,11 +43,10 @@ const App = () => (
                 <Route path="profile" element={<Profile />} />
                 <Route path="trash" element={<Trash />} />
               </Route>
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
-        </SidebarProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
