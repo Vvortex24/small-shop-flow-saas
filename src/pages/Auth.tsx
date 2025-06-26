@@ -30,22 +30,22 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: "خطأ في تسجيل الدخول",
+            title: "Login Error",
             description: error.message,
             variant: "destructive"
           });
         } else {
           toast({
-            title: "مرحباً بعودتك!",
-            description: "تم تسجيل دخولك بنجاح",
+            title: "Welcome back!",
+            description: "You have successfully logged in",
           });
           navigate('/');
         }
       } else {
         if (!name.trim()) {
           toast({
-            title: "خطأ",
-            description: "يرجى إدخال اسمك الكامل",
+            title: "Error",
+            description: "Please enter your full name",
             variant: "destructive"
           });
           setLoading(false);
@@ -55,22 +55,22 @@ const Auth = () => {
         const { error } = await signUp(email, password, name);
         if (error) {
           toast({
-            title: "خطأ في إنشاء الحساب",
+            title: "Registration Error",
             description: error.message,
             variant: "destructive"
           });
         } else {
           toast({
-            title: "تم إنشاء الحساب بنجاح!",
-            description: "يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب",
+            title: "Account created successfully!",
+            description: "Please check your email to verify your account",
           });
           setIsLogin(true);
         }
       }
     } catch (error) {
       toast({
-        title: "خطأ",
-        description: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again",
         variant: "destructive"
       });
     }
@@ -100,10 +100,10 @@ const Auth = () => {
             {/* Title with gradient text */}
             <div className="space-y-2">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                {isLogin ? 'مرحباً بعودتك' : 'إنشاء حساب جديد'}
+                {isLogin ? 'Welcome Back' : 'Create Account'}
               </CardTitle>
               <p className="text-white/80 text-lg">
-                {isLogin ? 'سجل دخولك إلى حساب مشايتك' : 'ابدأ في إدارة متجرك اليوم'}
+                {isLogin ? 'Sign in to your account' : 'Start managing your business today'}
               </p>
             </div>
           </CardHeader>
@@ -113,11 +113,11 @@ const Auth = () => {
               {/* Name field for registration */}
               {!isLogin && (
                 <div className="space-y-2 animate-slide-up">
-                  <Label htmlFor="name" className="text-white/90 font-medium">الاسم الكامل</Label>
+                  <Label htmlFor="name" className="text-white/90 font-medium">Full Name</Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="أدخل اسمك الكامل"
+                    placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={!isLogin}
@@ -128,11 +128,11 @@ const Auth = () => {
               
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/90 font-medium">البريد الإلكتروني</Label>
+                <Label htmlFor="email" className="text-white/90 font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="أدخل بريدك الإلكتروني"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -142,12 +142,12 @@ const Auth = () => {
               
               {/* Password field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white/90 font-medium">كلمة المرور</Label>
+                <Label htmlFor="password" className="text-white/90 font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="أدخل كلمة المرور"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -156,7 +156,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -172,10 +172,10 @@ const Auth = () => {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    جاري التحميل...
+                    Loading...
                   </div>
                 ) : (
-                  isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب'
+                  isLogin ? 'Sign In' : 'Create Account'
                 )}
               </Button>
             </form>
@@ -188,8 +188,8 @@ const Auth = () => {
                 className="text-white/80 hover:text-white transition-colors duration-300 font-medium underline decoration-white/40 hover:decoration-white/80"
               >
                 {isLogin 
-                  ? "ليس لديك حساب؟ سجل الآن" 
-                  : "لديك حساب بالفعل؟ سجل دخولك"
+                  ? "Don't have an account? Sign up" 
+                  : "Already have an account? Sign in"
                 }
               </button>
             </div>
