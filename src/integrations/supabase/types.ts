@@ -71,8 +71,10 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          photo_url: string | null
           price: number
           stock: number | null
+          type: string
           updated_at: string | null
           user_id: string
         }
@@ -80,8 +82,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          photo_url?: string | null
           price: number
           stock?: number | null
+          type?: string
           updated_at?: string | null
           user_id: string
         }
@@ -89,8 +93,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          photo_url?: string | null
           price?: number
           stock?: number | null
+          type?: string
           updated_at?: string | null
           user_id?: string
         }

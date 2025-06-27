@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Package, Edit, Trash2, Upload, Wrench } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -17,9 +19,9 @@ interface Product {
   price: number;
   stock: number;
   type: string;
-  photo_url?: string;
-  created_at: string;
-  updated_at?: string;
+  photo_url?: string | null;
+  created_at: string | null;
+  updated_at?: string | null;
   user_id: string;
 }
 
@@ -39,6 +41,8 @@ const Inventory = () => {
   const [editingItem, setEditingItem] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editType, setEditType] = useState<'product' | 'material'>('product');
+  const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
+  const [isAddMaterialDialogOpen, setIsAddMaterialDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -128,6 +132,7 @@ const Inventory = () => {
       setProductPrice("");
       setProductStock("");
       setProductPhoto(null);
+      setIsAddProductDialogOpen(false);
       fetchInventory();
     } catch (error) {
       console.error('Error adding product:', error);
@@ -174,6 +179,7 @@ const Inventory = () => {
       setMaterialName("");
       setMaterialPrice("");
       setMaterialStock("");
+      setIsAddMaterialDialogOpen(false);
       fetchInventory();
     } catch (error) {
       console.error('Error adding material:', error);
@@ -352,8 +358,72 @@ const Inventory = () => {
 
         {/* Products Tab */}
         <TabsContent value="products" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Ready Products</h2>
+            <Dialog open={isAddProductDialogOpen} onOpenChange={setIsAddProductDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-business hover:bg-business-dark">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Ready Product</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="product-name">Product Name</Label>
+                    <Input 
+                      id="product-name" 
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      placeholder="Enter product name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="product-price">Price (SYP)</Label>
+                    <Input 
+                      id="product-price" 
+                      type="number"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="product-stock">Stock Quantity</Label>
+                    <Input 
+                      id="product-stock" 
+                      type="number"
+                      value={productStock}
+                      onChange={(e) => setProductStock(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="product-photo">Product Photo (Required)</Label>
+                    <Input 
+                      id="product-photo" 
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddProduct}
+                    disabled={isSubmitting}
+                    className="w-full bg-business hover:bg-business-dark"
+                  >
+                    {isSubmitting ? "Adding..." : "Add Product"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
           {/* Empty State for Products */}
-          {products.length === 0 && (
+          {filteredProducts.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
                 <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -363,18 +433,167 @@ const Inventory = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Products Table */}
+          {filteredProducts.length > 0 && (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.price.toLocaleString()} SYP</TableCell>
+                        <TableCell>{product.stock}</TableCell>
+                        <TableCell>{getStockStatus(product.stock)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditItem(product, 'product')}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteItem(product.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Materials Tab */}
         <TabsContent value="materials" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Raw Materials</h2>
+            <Dialog open={isAddMaterialDialogOpen} onOpenChange={setIsAddMaterialDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-business hover:bg-business-dark">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Material
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Raw Material</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="material-name">Material Name</Label>
+                    <Input 
+                      id="material-name" 
+                      value={materialName}
+                      onChange={(e) => setMaterialName(e.target.value)}
+                      placeholder="Enter material name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="material-price">Price (SYP)</Label>
+                    <Input 
+                      id="material-price" 
+                      type="number"
+                      value={materialPrice}
+                      onChange={(e) => setMaterialPrice(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="material-stock">Stock Quantity</Label>
+                    <Input 
+                      id="material-stock" 
+                      type="number"
+                      value={materialStock}
+                      onChange={(e) => setMaterialStock(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddMaterial}
+                    disabled={isSubmitting}
+                    className="w-full bg-business hover:bg-business-dark"
+                  >
+                    {isSubmitting ? "Adding..." : "Add Material"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
           {/* Empty State for Materials */}
-          {rawMaterials.length === 0 && (
+          {filteredMaterials.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
                 <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No raw materials yet</h3>
                 <p className="text-gray-600 mb-4">Start by adding your first raw material</p>
                 <p className="text-sm text-gray-500">Raw materials don't require photos</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Materials Table */}
+          {filteredMaterials.length > 0 && (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredMaterials.map((material) => (
+                      <TableRow key={material.id}>
+                        <TableCell className="font-medium">{material.name}</TableCell>
+                        <TableCell>{material.price.toLocaleString()} SYP</TableCell>
+                        <TableCell>{material.stock}</TableCell>
+                        <TableCell>{getStockStatus(material.stock)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditItem(material, 'material')}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteItem(material.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           )}
