@@ -6,20 +6,10 @@ import { Trash2, RotateCcw, Package, ShoppingCart, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const Trash = () => {
-  const [deletedOrders, setDeletedOrders] = useState([
-    { id: 1, customer: "Sara Ahmed", product: "Blue Dress", amount: 177000, deletedAt: "2024-01-20" },
-    { id: 2, customer: "Mohammed Ali", product: "Formal Suit", amount: 250000, deletedAt: "2024-01-19" },
-  ]);
-
-  const [deletedProducts, setDeletedProducts] = useState([
-    { id: 1, name: "Red Dress", category: "Clothing", price: 125000, deletedAt: "2024-01-18" },
-    { id: 2, name: "Black Shoes", category: "Footwear", price: 85000, deletedAt: "2024-01-17" },
-  ]);
-
-  const [deletedMaterials, setDeletedMaterials] = useState([
-    { id: 1, name: "Cotton Fabric", quantity: "5 meters", cost: 41700, deletedAt: "2024-01-16" },
-    { id: 2, name: "Silk Thread", quantity: "10 rolls", cost: 25000, deletedAt: "2024-01-15" },
-  ]);
+  // Start with empty arrays for new users
+  const [deletedOrders, setDeletedOrders] = useState([]);
+  const [deletedProducts, setDeletedProducts] = useState([]);
+  const [deletedMaterials, setDeletedMaterials] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -48,7 +38,7 @@ const Trash = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 space-y-6 animate-fade-in">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Trash</h1>
         <p className="text-gray-600">Manage deleted items and restore them if needed</p>
@@ -56,17 +46,17 @@ const Trash = () => {
 
       <Tabs defaultValue="orders" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="orders" className="flex items-center gap-2">
+          <TabsTrigger value="orders" className="flex items-center gap-2 text-xs sm:text-sm">
             <ShoppingCart className="w-4 h-4" />
-            Orders
+            <span className="hidden sm:inline">Orders</span>
           </TabsTrigger>
-          <TabsTrigger value="products" className="flex items-center gap-2">
+          <TabsTrigger value="products" className="flex items-center gap-2 text-xs sm:text-sm">
             <Package className="w-4 h-4" />
-            Products
+            <span className="hidden sm:inline">Products</span>
           </TabsTrigger>
-          <TabsTrigger value="materials" className="flex items-center gap-2">
+          <TabsTrigger value="materials" className="flex items-center gap-2 text-xs sm:text-sm">
             <Wrench className="w-4 h-4" />
-            Raw Materials
+            <span className="hidden sm:inline">Materials</span>
           </TabsTrigger>
         </TabsList>
 
@@ -79,41 +69,11 @@ const Trash = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {deletedOrders.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No deleted orders</p>
-              ) : (
-                <div className="space-y-4">
-                  {deletedOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{order.customer} - {order.product}</p>
-                        <p className="text-sm text-gray-500">Deleted on {order.deletedAt}</p>
-                        <p className="text-sm font-medium text-profit">{order.amount.toLocaleString()} SYP</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => restoreOrder(order.id)}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => permanentlyDelete('order', order.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete Forever
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="text-center py-12">
+                <Trash2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No deleted orders</h3>
+                <p className="text-gray-500">Items you delete will appear here</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -127,42 +87,11 @@ const Trash = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {deletedProducts.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No deleted products</p>
-              ) : (
-                <div className="space-y-4">
-                  {deletedProducts.map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-gray-500">Category: {product.category}</p>
-                        <p className="text-sm text-gray-500">Deleted on {product.deletedAt}</p>
-                        <p className="text-sm font-medium text-business">{product.price.toLocaleString()} SYP</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => restoreProduct(product.id)}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => permanentlyDelete('product', product.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete Forever
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="text-center py-12">
+                <Trash2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No deleted products</h3>
+                <p className="text-gray-500">Items you delete will appear here</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -176,42 +105,11 @@ const Trash = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {deletedMaterials.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No deleted raw materials</p>
-              ) : (
-                <div className="space-y-4">
-                  {deletedMaterials.map((material) => (
-                    <div key={material.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{material.name}</p>
-                        <p className="text-sm text-gray-500">Quantity: {material.quantity}</p>
-                        <p className="text-sm text-gray-500">Deleted on {material.deletedAt}</p>
-                        <p className="text-sm font-medium text-expense">{material.cost.toLocaleString()} SYP</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => restoreMaterial(material.id)}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                          Restore
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => permanentlyDelete('material', material.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete Forever
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="text-center py-12">
+                <Trash2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No deleted materials</h3>
+                <p className="text-gray-500">Items you delete will appear here</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

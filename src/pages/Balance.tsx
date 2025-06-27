@@ -1,153 +1,125 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Minus, Filter } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, TrendingUp, TrendingDown, DollarSign, Calendar, FileText, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Balance = () => {
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawName, setWithdrawName] = useState("");
-  const [withdrawNote, setWithdrawNote] = useState("");
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const [transactionFilter, setTransactionFilter] = useState("all");
-  
-  // Sample data
-  const totalBalance = 3275000; // in Syrian Lira
-  const totalProfit = 4890000;
-  const totalExpenses = 1615000;
-  const profitPercentage = 67.0;
-  const expensePercentage = 33.0;
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<"income" | "expense">("income");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Financial transactions log with withdraw entries
-  const transactions = [
-    {
-      id: "1",
-      type: "profit",
-      amount: 177000,
-      description: "Order from Sara Ahmed - Blue Dress",
-      date: "2024-01-20",
-      time: "14:30"
-    },
-    {
-      id: "2", 
-      type: "expense",
-      amount: 41700,
-      description: "Raw materials purchase - Cotton fabric",
-      date: "2024-01-20", 
-      time: "10:15"
-    },
-    {
-      id: "3",
-      type: "withdraw",
-      amount: 100000,
-      name: "Personal expenses",
-      description: "Monthly personal allowance",
-      date: "2024-01-19",
-      time: "18:00",
-      note: "Monthly withdrawal for personal use"
-    },
-    {
-      id: "4",
-      type: "profit", 
-      amount: 250000,
-      description: "Order from Mohammed Ali - Formal suit",
-      date: "2024-01-19",
-      time: "16:45"
-    },
-    {
-      id: "5",
-      type: "expense",
-      amount: 31300,
-      description: "Shipping and delivery costs",
-      date: "2024-01-19",
-      time: "12:20"
-    },
-    {
-      id: "6",
-      type: "profit",
-      amount: 135000,
-      description: "Order from Fatima Khaled - Handbag",
-      date: "2024-01-18",
-      time: "09:30"
+  useEffect(() => {
+    if (user) {
+      fetchTransactions();
     }
-  ];
+  }, [user]);
 
-  // Sample weekly analysis
-  const weeklyAnalysis = {
-    profitChange: +12.5,
-    expenseChange: -8.3,
-    comparison: "compared to last week"
-  };
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
 
-  const monthlyData = [
-    { month: "January", profit: 4890000, expense: 1615000 },
-    { month: "February", profit: 3788000, expense: 1333000 },
-    { month: "March", profit: 5580000, expense: 1854000 },
-    { month: "April", profit: 4475000, expense: 1500000 },
-  ];
+      if (error) throw error;
 
-  const handleWithdraw = () => {
-    if (withdrawAmount && parseFloat(withdrawAmount) > 0 && withdrawName.trim()) {
-      console.log(`Withdrew ${withdrawAmount} SYP by ${withdrawName}: ${withdrawNote}`);
-      setWithdrawAmount("");
-      setWithdrawName("");
-      setWithdrawNote("");
-      setIsWithdrawOpen(false);
+      const transactionData = data || [];
+      setTransactions(transactionData);
+
+      // Calculate balance
+      const totalIncome = transactionData
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const totalExpenses = transactionData
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      setBalance(totalIncome - totalExpenses);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load financial data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Filter transactions based on selected filter
-  const filteredTransactions = transactions.filter(transaction => {
-    if (transactionFilter === "all") return true;
-    if (transactionFilter === "profits") return transaction.type === "profit";
-    if (transactionFilter === "expenses") return transaction.type === "expense";
-    if (transactionFilter === "withdraws") return transaction.type === "withdraw";
-    return true;
-  });
+  const handleAddTransaction = async () => {
+    if (!amount || !description.trim()) return;
 
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case 'profit':
-        return <TrendingUp className="w-5 h-5 text-profit" />;
-      case 'expense':
-        return <TrendingDown className="w-5 h-5 text-expense" />;
-      case 'withdraw':
-        return <Minus className="w-5 h-5 text-orange-600" />;
-      default:
-        return <DollarSign className="w-5 h-5 text-gray-500" />;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('financial_transactions')
+        .insert({
+          user_id: user?.id,
+          type,
+          amount: parseFloat(amount),
+          description: description.trim()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `${type === 'income' ? 'Income' : 'Expense'} added successfully`
+      });
+
+      // Reset form and refresh data
+      setAmount("");
+      setDescription("");
+      setType("income");
+      fetchTransactions();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add transaction",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const getTransactionColor = (type) => {
-    switch (type) {
-      case 'profit':
-        return 'text-profit';
-      case 'expense':
-        return 'text-expense';
-      case 'withdraw':
-        return 'text-orange-600';
-      default:
-        return 'text-gray-500';
-    }
-  };
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const getTransactionBgColor = (type) => {
-    switch (type) {
-      case 'profit':
-        return 'bg-profit-light';
-      case 'expense':
-        return 'bg-expense-light';
-      case 'withdraw':
-        return 'bg-orange-100';
-      default:
-        return 'bg-gray-100';
-    }
-  };
+  const totalExpenses = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-business"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -155,287 +127,258 @@ const Balance = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Financial Balance</h1>
-          <p className="text-gray-600 mt-1">Track profits and expenses</p>
+          <p className="text-gray-600 mt-1">Track your income, expenses, and financial health</p>
         </div>
         
-        <div className="flex gap-2">
-          <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
-                <Minus className="w-4 h-4 mr-2" />
-                Withdraw
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Withdraw Money</DialogTitle>
-                <DialogDescription>
-                  Record a withdrawal from your profits
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="withdraw-name">Withdrawal Name *</Label>
-                  <Input
-                    id="withdraw-name"
-                    placeholder="e.g., Personal expenses, Business investment..."
-                    value={withdrawName}
-                    onChange={(e) => setWithdrawName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="withdraw-amount">Amount (SYP) *</Label>
-                  <Input
-                    id="withdraw-amount"
-                    type="number"
-                    placeholder="Enter amount..."
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="withdraw-note">Note (Optional)</Label>
-                  <Input
-                    id="withdraw-note"
-                    placeholder="Additional details..."
-                    value={withdrawNote}
-                    onChange={(e) => setWithdrawNote(e.target.value)}
-                  />
-                </div>
-                <Button 
-                  onClick={handleWithdraw} 
-                  className="w-full"
-                  disabled={!withdrawName.trim() || !withdrawAmount || parseFloat(withdrawAmount) <= 0}
-                >
-                  Confirm Withdrawal
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Select defaultValue="current-month">
-            <SelectTrigger className="w-48">
-              <Calendar className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current-month">Current Month</SelectItem>
-              <SelectItem value="last-month">Last Month</SelectItem>
-              <SelectItem value="quarter">Last 3 Months</SelectItem>
-              <SelectItem value="year">Current Year</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Main Balance Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Total Balance */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Balance</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-business mb-2">{totalBalance.toLocaleString()} SYP</p>
-                <div className="flex items-center justify-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-profit" />
-                  <span className="text-sm text-profit font-medium">In profit</span>
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-business hover:bg-business-dark gap-2">
+              <Plus className="w-4 h-4" />
+              Add Transaction
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Transaction</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-profit">Profit</span>
-                  <span className="text-expense">Expenses</span>
-                </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden flex">
-                  <div 
-                    className="bg-profit"
-                    style={{ width: `${profitPercentage}%` }}
-                  />
-                  <div 
-                    className="bg-expense"
-                    style={{ width: `${expensePercentage}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{profitPercentage.toFixed(1)}%</span>
-                  <span>{expensePercentage.toFixed(1)}%</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Profit Card */}
-        <Card className="border-profit/20">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Profit</CardTitle>
-              <div className="w-8 h-8 bg-profit-light rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-profit" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div>
-              <p className="text-3xl font-bold text-profit mb-2">{totalProfit.toLocaleString()}</p>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-profit" />
-                <span className="text-sm text-profit font-medium">
-                  +{weeklyAnalysis.profitChange}% {weeklyAnalysis.comparison}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Expenses Card */}
-        <Card className="border-expense/20">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Expenses</CardTitle>
-              <div className="w-8 h-8 bg-expense-light rounded-lg flex items-center justify-center">
-                <TrendingDown className="w-4 h-4 text-expense" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div>
-              <p className="text-3xl font-bold text-expense mb-2">{totalExpenses.toLocaleString()}</p>
-              <div className="flex items-center gap-2">
-                <TrendingDown className="w-4 h-4 text-profit" />
-                <span className="text-sm text-profit font-medium">
-                  {weeklyAnalysis.expenseChange}% {weeklyAnalysis.comparison}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Weekly Analysis Alert */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-business-light rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-              <TrendingUp className="w-4 h-4 text-business" />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-semibold text-business">Weekly Analysis</h4>
-              <p className="text-sm text-blue-700">
-                Profits increased by <strong>{weeklyAnalysis.profitChange}%</strong> and expenses decreased by <strong>{Math.abs(weeklyAnalysis.expenseChange)}%</strong> compared to last week. Excellent performance! 🎉
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tabs for Details */}
-      <Tabs defaultValue="transactions" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="transactions">Transaction Log</TabsTrigger>
-          <TabsTrigger value="reports">Monthly Reports</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="transactions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <CardTitle className="text-lg">Recent Financial Transactions</CardTitle>
-                <Select value={transactionFilter} onValueChange={setTransactionFilter}>
-                  <SelectTrigger className="w-48">
-                    <Filter className="w-4 h-4 mr-2" />
+                <Label htmlFor="transaction-type">Transaction Type *</Label>
+                <Select value={type} onValueChange={(value: "income" | "expense") => setType(value)}>
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Transactions</SelectItem>
-                    <SelectItem value="profits">Profits Only</SelectItem>
-                    <SelectItem value="expenses">Expenses Only</SelectItem>
-                    <SelectItem value="withdraws">Withdrawals Only</SelectItem>
+                    <SelectItem value="income">Income</SelectItem>
+                    <SelectItem value="expense">Expense</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="transaction-amount">Amount (SYP) *</Label>
+                <Input 
+                  id="transaction-amount" 
+                  type="number"
+                  placeholder="0" 
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="transaction-description">Description *</Label>
+                <Textarea 
+                  id="transaction-description" 
+                  placeholder="Enter transaction description..." 
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1 bg-business hover:bg-business-dark"
+                  disabled={!amount || !description.trim() || isSubmitting}
+                  onClick={handleAddTransaction}
+                >
+                  {isSubmitting ? "Adding..." : "Add Transaction"}
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setAmount("");
+                    setDescription("");
+                    setType("income");
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-profit' : 'text-red-600'}`}>
+              {balance.toLocaleString()} SYP
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {balance >= 0 ? 'Positive balance' : 'Negative balance'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <TrendingUp className="h-4 w-4 text-profit" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-profit">{totalIncome.toLocaleString()} SYP</div>
+            <p className="text-xs text-muted-foreground">
+              {transactions.filter(t => t.type === 'income').length} transactions
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{totalExpenses.toLocaleString()} SYP</div>
+            <p className="text-xs text-muted-foreground">
+              {transactions.filter(t => t.type === 'expense').length} transactions
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Transactions */}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="all">All Transactions</TabsTrigger>
+          <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Transaction History</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {filteredTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between py-3 border-b last:border-0">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTransactionBgColor(transaction.type)}`}>
-                        {getTransactionIcon(transaction.type)}
+              {transactions.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No transactions yet</h3>
+                  <p className="text-gray-500">Start by adding your first income or expense</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                          {transaction.type === 'income' ? 
+                            <TrendingUp className="w-5 h-5 text-profit" /> : 
+                            <TrendingDown className="w-5 h-5 text-red-600" />
+                          }
+                        </div>
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        {transaction.type === 'withdraw' ? (
-                          <>
-                            <p className="font-medium text-sm">{transaction.name}</p>
-                            <p className="text-xs text-gray-500">{transaction.description}</p>
-                            {transaction.note && (
-                              <p className="text-xs text-gray-400 italic">Note: {transaction.note}</p>
-                            )}
-                            <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="font-medium text-sm">{transaction.description}</p>
-                            <p className="text-xs text-gray-500">{transaction.date} - {transaction.time}</p>
-                          </>
-                        )}
+                      <div className={`text-lg font-bold ${
+                        transaction.type === 'income' ? 'text-profit' : 'text-red-600'
+                      }`}>
+                        {transaction.type === 'income' ? '+' : '-'}{Number(transaction.amount).toLocaleString()} SYP
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className={`text-lg font-bold ${getTransactionColor(transaction.type)}`}>
-                        {transaction.type === 'profit' ? '+' : '-'}{transaction.amount.toLocaleString()} SYP
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="reports" className="space-y-4">
+        <TabsContent value="income" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Monthly Report</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-profit" />
+                Income Transactions
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {monthlyData.map((month, index) => (
-                  <div key={index} className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold">{month.month}</h4>
-                      <span className="text-lg font-bold text-business">
-                        {(month.profit - month.expense).toLocaleString()} SYP
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-profit">Profit: {month.profit.toLocaleString()} SYP</span>
-                        <span className="text-expense">Expenses: {month.expense.toLocaleString()} SYP</span>
+              {transactions.filter(t => t.type === 'income').length === 0 ? (
+                <div className="text-center py-12">
+                  <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No income recorded</h3>
+                  <p className="text-gray-500">Add your first income transaction</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {transactions.filter(t => t.type === 'income').map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-profit" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      
-                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden flex">
-                        <div 
-                          className="bg-profit"
-                          style={{ width: `${(month.profit / (month.profit + month.expense)) * 100}%` }}
-                        />
-                        <div 
-                          className="bg-expense"
-                          style={{ width: `${(month.expense / (month.profit + month.expense)) * 100}%` }}
-                        />
+                      <div className="text-lg font-bold text-profit">
+                        +{Number(transaction.amount).toLocaleString()} SYP
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="expenses" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingDown className="w-5 h-5 text-red-600" />
+                Expense Transactions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {transactions.filter(t => t.type === 'expense').length === 0 ? (
+                <div className="text-center py-12">
+                  <TrendingDown className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses recorded</h3>
+                  <p className="text-gray-500">Add your first expense transaction</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {transactions.filter(t => t.type === 'expense').map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                          <TrendingDown className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{transaction.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-lg font-bold text-red-600">
+                        -{Number(transaction.amount).toLocaleString()} SYP
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

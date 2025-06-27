@@ -7,18 +7,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { User, Phone, Mail, MapPin, Calendar, Crown, Settings, Bell, Shield } from "lucide-react";
+import { User, Phone, Mail, MapPin, Calendar, Crown, Settings, Bell, Shield, LogOut, Trash2, Upload, Camera } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { toast } = useToast();
   const [name, setName] = useState('');
+  const [profileImage, setProfileImage] = useState('');
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -92,6 +94,58 @@ const Profile = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      // First delete user's data
+      await supabase.from('orders').delete().eq('user_id', user?.id);
+      await supabase.from('products').delete().eq('user_id', user?.id);
+      await supabase.from('financial_transactions').delete().eq('user_id', user?.id);
+      await supabase.from('profiles').delete().eq('id', user?.id);
+      
+      toast({
+        title: "Account Deleted",
+        description: "Your account and all data have been permanently deleted",
+        variant: "destructive"
+      });
+      
+      // Sign out after deletion
+      await signOut();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete account",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (!profile) {
     return (
       <div className="p-6 space-y-6 animate-fade-in">
@@ -116,12 +170,28 @@ const Profile = () => {
         <div className="h-24 bg-gradient-to-r from-blue-500 to-blue-600"></div>
         <CardContent className="relative pt-0 pb-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-12">
-            <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-              <AvatarImage src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face" />
-              <AvatarFallback className="bg-business text-white text-4xl">
-                {profile.name?.charAt(0) || '👤'}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
+                <AvatarImage src={profileImage || "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=150&h=150&fit=crop&crop=face"} />
+                <AvatarFallback className="bg-business text-white text-4xl">
+                  {profile.name?.charAt(0) || '👤'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute bottom-0 right-0">
+                <Label htmlFor="profile-image" className="cursor-pointer">
+                  <div className="w-8 h-8 bg-business text-white rounded-full flex items-center justify-center hover:bg-business-dark transition-colors">
+                    <Camera className="w-4 h-4" />
+                  </div>
+                </Label>
+                <Input
+                  id="profile-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
+            </div>
             
             <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -290,9 +360,42 @@ const Profile = () => {
               <Button variant="outline" className="w-full justify-start">
                 Export Data
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50">
-                Delete Account
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-blue-600 hover:bg-blue-50"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Account</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-gray-600">
+                      Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline">Cancel</Button>
+                      <Button 
+                        variant="destructive"
+                        onClick={handleDeleteAccount}
+                      >
+                        Delete Account
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </TabsContent>

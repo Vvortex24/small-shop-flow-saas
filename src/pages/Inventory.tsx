@@ -1,103 +1,145 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Package, Edit, Trash2, Upload, Camera } from "lucide-react";
+import { Plus, Search, Filter, Package, Edit, Trash2, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [productImage, setProductImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [productName, setProductName] = useState("");
+  const [productPrice, setProductPrice] = useState("");
+  const [productStock, setProductStock] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Sample data for ready products
-  const readyProducts = [
-    {
-      id: "1",
-      name: "Elegant Blue Dress",
-      price: 52000,
-      quantity: 5,
-      description: "Elegant summer dress for special occasions",
-      image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300",
-      addedDate: "2024-01-15"
-    },
-    {
-      id: "2", 
-      name: "Men's Formal Suit",
-      price: 167000,
-      quantity: 3,
-      description: "High-quality formal suit",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
-      addedDate: "2024-01-10"
-    },
-    {
-      id: "3",
-      name: "Women's Handbag",
-      price: 37500,
-      quantity: 8,
-      description: "Elegant bag for daily use",
-      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300",
-      addedDate: "2024-01-12"
+  useEffect(() => {
+    if (user) {
+      fetchProducts();
     }
-  ];
+  }, [user]);
 
-  // Sample data for raw materials
-  const rawMaterials = [
-    {
-      id: "1",
-      name: "Cotton Fabric",
-      cost: 9400,
-      quantity: 20,
-      unit: "meter",
-      supplier: "Golden Textile Company",
-      addedDate: "2024-01-18"
-    },
-    {
-      id: "2",
-      name: "Metal Buttons", 
-      cost: 5200,
-      quantity: 100,
-      unit: "piece",
-      supplier: "Accessories Factory",
-      addedDate: "2024-01-16"
-    }
-  ];
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProductImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load products",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeImage = () => {
-    setProductImage(null);
-    setImagePreview("");
+  const handleAddProduct = async () => {
+    if (!productName.trim() || !productPrice || !productStock) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .insert({
+          user_id: user?.id,
+          name: productName.trim(),
+          price: parseFloat(productPrice),
+          stock: parseInt(productStock)
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Product added successfully"
+      });
+
+      // Reset form and refresh products
+      setProductName("");
+      setProductPrice("");
+      setProductStock("");
+      fetchProducts();
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add product",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const filteredReadyProducts = readyProducts.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const deleteProduct = async (productId: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('user_id', user?.id);
 
-  const filteredRawMaterials = rawMaterials.filter(material => 
-    material.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      if (error) throw error;
 
-  const getStockBadge = (quantity: number) => {
-    if (quantity > 10) return <Badge className="bg-profit text-white">In Stock</Badge>;
-    if (quantity > 0) return <Badge className="bg-yellow-500 text-white">Low Stock</Badge>;
-    return <Badge variant="destructive">Out of Stock</Badge>;
+      toast({
+        title: "Success",
+        description: "Product moved to trash successfully",
+      });
+
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
+    }
   };
+
+  const getStockStatus = (stock: number) => {
+    if (stock === 0) {
+      return <Badge variant="destructive">Out of Stock</Badge>;
+    } else if (stock <= 5) {
+      return <Badge variant="outline" className="border-yellow-500 text-yellow-600">Low Stock</Badge>;
+    }
+    return <Badge className="bg-profit text-white">In Stock</Badge>;
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-business"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -105,244 +147,159 @@ const Inventory = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
-          <p className="text-gray-600 mt-1">Track products and raw materials</p>
+          <p className="text-gray-600 mt-1">Manage your products and stock levels</p>
         </div>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-business hover:bg-business-dark gap-2">
+              <Plus className="w-4 h-4" />
+              Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Product</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="product-name">Product Name *</Label>
+                <Input 
+                  id="product-name" 
+                  placeholder="Enter product name" 
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="product-price">Price (SYP) *</Label>
+                <Input 
+                  id="product-price" 
+                  type="number"
+                  placeholder="0" 
+                  value={productPrice}
+                  onChange={(e) => setProductPrice(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="product-stock">Stock Quantity *</Label>
+                <Input 
+                  id="product-stock" 
+                  type="number"
+                  placeholder="0" 
+                  value={productStock}
+                  onChange={(e) => setProductStock(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1 bg-business hover:bg-business-dark"
+                  disabled={!productName.trim() || !productPrice || !productStock || isSubmitting}
+                  onClick={handleAddProduct}
+                >
+                  {isSubmitting ? "Adding..." : "Add Product"}
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setProductName("");
+                    setProductPrice("");
+                    setProductStock("");
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search inventory..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Search and Filters - Only show if user has products */}
+      {products.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Tabs for Products vs Raw Materials */}
-      <Tabs defaultValue="products" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="products">Ready Products</TabsTrigger>
-          <TabsTrigger value="materials">Raw Materials</TabsTrigger>
-        </TabsList>
-        
-        {/* Ready Products Tab */}
-        <TabsContent value="products" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Products Ready for Sale</h2>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
-                  <Plus className="w-4 h-4" />
-                  New Product
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Add New Product</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="product-name">Product Name</Label>
-                    <Input id="product-name" placeholder="Enter product name" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="price">Price (SYP)</Label>
-                      <Input id="price" type="number" placeholder="0" />
+      {/* Products Grid */}
+      <div className="grid gap-4">
+        {filteredProducts.map((product) => (
+          <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-business-light rounded-full flex items-center justify-center">
+                      <Package className="w-5 h-5 text-business" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="quantity">Quantity</Label>
-                      <Input id="quantity" type="number" placeholder="0" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Product Photo</Label>
-                    <div className="flex items-center gap-2">
-                      <Input 
-                        type="file" 
-                        accept=".jpg,.jpeg,.png,.webp"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <Label htmlFor="image-upload" className="cursor-pointer">
-                        <Button type="button" variant="outline" className="gap-2" asChild>
-                          <span>
-                            <Camera className="w-4 h-4" />
-                            Upload Photo
-                          </span>
-                        </Button>
-                      </Label>
-                    </div>
-                    {imagePreview && (
-                      <div className="relative">
-                        <img 
-                          src={imagePreview} 
-                          alt="Product preview" 
-                          className="w-full h-32 object-cover rounded-lg border"
-                        />
-                        <Button 
-                          type="button"
-                          variant="ghost" 
-                          size="sm"
-                          className="absolute top-1 right-1 bg-white/80 hover:bg-white"
-                          onClick={removeImage}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                    <div>
+                      <h3 className="font-semibold text-lg">{product.name}</h3>
+                      <div className="text-sm text-gray-600">
+                        Stock: {product.stock} units
                       </div>
-                    )}
+                    </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" placeholder="Product description..." rows={3} />
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-600">
+                      <strong>Added:</strong> {new Date(product.created_at).toLocaleDateString()}
+                    </p>
                   </div>
-                  
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                    Add Product
-                  </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReadyProducts.map((product) => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200">
-                <div className="aspect-square relative overflow-hidden rounded-t-lg">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
+                
+                <div className="text-right space-y-2">
+                  {getStockStatus(product.stock)}
+                  <p className="text-2xl font-bold text-business">{product.price.toLocaleString()} SYP</p>
+                  <div className="flex gap-2 justify-end">
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-red-600 hover:bg-red-50"
+                      onClick={() => deleteProduct(product.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between">
-                      <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
-                      {getStockBadge(product.quantity)}
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-business">{product.price.toLocaleString()} SYP</span>
-                      <span className="text-sm text-gray-500">{product.quantity} pcs</span>
-                    </div>
-                    
-                    <div className="flex gap-2 pt-2">
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Raw Materials Tab */}
-        <TabsContent value="materials" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Raw Materials & Imported Items</h2>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-expense hover:bg-expense-dark gap-2">
-                  <Plus className="w-4 h-4" />
-                  New Material
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add Raw Material</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="material-name">Material Name</Label>
-                    <Input id="material-name" placeholder="Enter material name" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cost">Cost (SYP)</Label>
-                      <Input id="cost" type="number" placeholder="0" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="material-quantity">Quantity</Label>
-                      <Input id="material-quantity" type="number" placeholder="0" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier">Supplier</Label>
-                    <Input id="supplier" placeholder="Supplier name" />
-                  </div>
-                  
-                  <Button className="w-full bg-expense hover:bg-expense-dark">
-                    Add Material
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="grid gap-4">
-            {filteredRawMaterials.map((material) => (
-              <Card key={material.id} className="hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-expense-light rounded-lg flex items-center justify-center">
-                        <Package className="w-6 h-6 text-expense" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{material.name}</h3>
-                        <p className="text-sm text-gray-600">Supplier: {material.supplier}</p>
-                        <p className="text-xs text-gray-500">Added: {material.addedDate}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right space-y-1">
-                      <p className="text-2xl font-bold text-expense">{material.cost.toLocaleString()} SYP</p>
-                      <p className="text-sm text-gray-600">{material.quantity} {material.unit}</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Empty State */}
-      {filteredReadyProducts.length === 0 && filteredRawMaterials.length === 0 && (
+      {products.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
             <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600">Start by adding your first products</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
+            <p className="text-gray-600 mb-4">Start by adding your first product to your inventory</p>
+            <p className="text-sm text-gray-500">Products you add will help you create orders more easily</p>
           </CardContent>
         </Card>
       )}
