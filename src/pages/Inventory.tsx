@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,17 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Package, Edit, Trash2, AlertTriangle, Upload, Wrench } from "lucide-react";
+import { Plus, Search, Package, Edit, Trash2, Upload, Wrench } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  type: string;
+  photo_url?: string;
+  created_at: string;
+  updated_at?: string;
+  user_id: string;
+}
+
 const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [products, setProducts] = useState<any[]>([]);
-  const [rawMaterials, setRawMaterials] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [rawMaterials, setRawMaterials] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [productName, setProductName] = useState("");
   const [productPrice, setProductPrice] = useState("");
@@ -26,7 +36,7 @@ const Inventory = () => {
   const [materialPrice, setMaterialPrice] = useState("");
   const [materialStock, setMaterialStock] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editType, setEditType] = useState<'product' | 'material'>('product');
   const { toast } = useToast();
@@ -177,7 +187,7 @@ const Inventory = () => {
     }
   };
 
-  const handleEditItem = (item: any, type: 'product' | 'material') => {
+  const handleEditItem = (item: Product, type: 'product' | 'material') => {
     setEditingItem(item);
     setEditType(type);
     if (type === 'product') {
@@ -340,151 +350,8 @@ const Inventory = () => {
           </TabsTrigger>
         </TabsList>
 
+        {/* Products Tab */}
         <TabsContent value="products" className="space-y-4">
-          <div className="flex justify-end">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-business hover:bg-business-dark gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Ready Product
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Ready Product</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="product-name">Product Name *</Label>
-                    <Input 
-                      id="product-name" 
-                      placeholder="Enter product name" 
-                      value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="product-price">Price (SYP) *</Label>
-                    <Input 
-                      id="product-price" 
-                      type="number"
-                      placeholder="0" 
-                      value={productPrice}
-                      onChange={(e) => setProductPrice(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="product-stock">Stock Quantity *</Label>
-                    <Input 
-                      id="product-stock" 
-                      type="number"
-                      placeholder="0" 
-                      value={productStock}
-                      onChange={(e) => setProductStock(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="product-photo">Product Photo *</Label>
-                    <Input 
-                      id="product-photo" 
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      required
-                    />
-                    {productPhoto && (
-                      <p className="text-sm text-green-600">Photo selected: {productPhoto.name}</p>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      className="flex-1 bg-business hover:bg-business-dark"
-                      disabled={!productName.trim() || !productPrice || !productStock || !productPhoto || isSubmitting}
-                      onClick={handleAddProduct}
-                    >
-                      {isSubmitting ? "Adding..." : "Add Product"}
-                    </Button>
-                    <Button 
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setProductName("");
-                        setProductPrice("");
-                        setProductStock("");
-                        setProductPhoto(null);
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid gap-4">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-business-light rounded-full flex items-center justify-center">
-                          <Package className="w-5 h-5 text-business" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{product.name}</h3>
-                          <div className="text-sm text-gray-600">
-                            Stock: {product.stock} units
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-600">
-                          <strong>Added:</strong> {new Date(product.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right space-y-2">
-                      {getStockStatus(product.stock)}
-                      <p className="text-2xl font-bold text-business">{product.price.toLocaleString()} SYP</p>
-                      <div className="flex gap-2 justify-end">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => handleEditItem(product, 'product')}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => deleteItem(product.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
           {/* Empty State for Products */}
           {products.length === 0 && (
             <Card>
@@ -498,136 +365,8 @@ const Inventory = () => {
           )}
         </TabsContent>
 
+        {/* Materials Tab */}
         <TabsContent value="materials" className="space-y-4">
-          <div className="flex justify-end">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-business hover:bg-business-dark gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Raw Material
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Raw Material</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="material-name">Material Name *</Label>
-                    <Input 
-                      id="material-name" 
-                      placeholder="Enter material name" 
-                      value={materialName}
-                      onChange={(e) => setMaterialName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="material-price">Price (SYP) *</Label>
-                    <Input 
-                      id="material-price" 
-                      type="number"
-                      placeholder="0" 
-                      value={materialPrice}
-                      onChange={(e) => setMaterialPrice(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="material-stock">Stock Quantity *</Label>
-                    <Input 
-                      id="material-stock" 
-                      type="number"
-                      placeholder="0" 
-                      value={materialStock}
-                      onChange={(e) => setMaterialStock(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      className="flex-1 bg-business hover:bg-business-dark"
-                      disabled={!materialName.trim() || !materialPrice || !materialStock || isSubmitting}
-                      onClick={handleAddMaterial}
-                    >
-                      {isSubmitting ? "Adding..." : "Add Material"}
-                    </Button>
-                    <Button 
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setMaterialName("");
-                        setMaterialPrice("");
-                        setMaterialStock("");
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Materials Grid */}
-          <div className="grid gap-4">
-            {filteredMaterials.map((material) => (
-              <Card key={material.id} className="hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-business-light rounded-full flex items-center justify-center">
-                          <Wrench className="w-5 h-5 text-business" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{material.name}</h3>
-                          <div className="text-sm text-gray-600">
-                            Stock: {material.stock} units
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-600">
-                          <strong>Added:</strong> {new Date(material.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right space-y-2">
-                      {getStockStatus(material.stock)}
-                      <p className="text-2xl font-bold text-business">{material.price.toLocaleString()} SYP</p>
-                      <div className="flex gap-2 justify-end">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => handleEditItem(material, 'material')}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => deleteItem(material.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
           {/* Empty State for Materials */}
           {rawMaterials.length === 0 && (
             <Card>
