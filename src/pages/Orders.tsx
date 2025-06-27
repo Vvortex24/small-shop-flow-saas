@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, MapPin, Calendar, CheckCircle } from "lucide-react";
+import { Plus, Search, Filter, Phone, User, ShoppingCart, Edit, Trash2, Upload, MapPin, Calendar, CheckCircle, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +26,8 @@ const Orders = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -85,6 +87,72 @@ const Orders = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Order marked as ${newStatus}`,
+      });
+
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditOrder = (order: any) => {
+    setEditingOrder(order);
+    setCustomerName(order.customer_name);
+    setIsEditDialogOpen(true);
+  };
+
+  const saveOrderEdit = async () => {
+    if (!editingOrder || !customerName.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          customer_name: customerName.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingOrder.id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Order updated successfully",
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingOrder(null);
+      setCustomerName("");
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order",
+        variant: "destructive",
+      });
+    }
+  };
+
   const deleteOrder = async (orderId: string) => {
     try {
       const { error } = await supabase
@@ -100,7 +168,6 @@ const Orders = () => {
         description: "Order moved to trash successfully",
       });
 
-      // Refresh orders list
       fetchOrders();
     } catch (error) {
       console.error('Error deleting order:', error);
@@ -189,10 +256,8 @@ const Orders = () => {
     setIsSubmitting(true);
 
     try {
-      // Calculate total amount
       const totalAmount = calculateTotalPrice();
 
-      // Insert order into database
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -206,7 +271,6 @@ const Orders = () => {
 
       if (orderError) throw orderError;
 
-      // Prepare webhook data
       const webhookData = {
         orderId: orderData.id,
         customerName,
@@ -229,10 +293,8 @@ const Orders = () => {
         timestamp: new Date().toISOString()
       };
 
-      // Send webhook
       await sendWebhook(webhookData);
       
-      // Show success message
       toast({
         title: "Thank You!",
         description: (
@@ -244,7 +306,6 @@ const Orders = () => {
         className: "border-green-200 bg-green-50",
       });
 
-      // Reset form and refresh orders
       resetForm();
       fetchOrders();
     } catch (error) {
@@ -550,6 +611,45 @@ const Orders = () => {
         </Dialog>
       </div>
 
+      {/* Edit Order Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Order</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-customer">Customer Name</Label>
+              <Input 
+                id="edit-customer" 
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Enter customer name"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={saveOrderEdit}
+                className="flex-1 bg-business hover:bg-business-dark"
+                disabled={!customerName.trim()}
+              >
+                Save Changes
+              </Button>
+              <Button 
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setEditingOrder(null);
+                  setCustomerName("");
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Filters - Only show if user has orders */}
       {orders.length > 0 && (
         <Card>
@@ -611,8 +711,58 @@ const Orders = () => {
                 <div className="text-right space-y-2">
                   {getStatusBadge(order.status)}
                   <p className="text-2xl font-bold text-business">{order.amount.toLocaleString()} SYP</p>
+                  
+                  {/* Status Actions */}
+                  <div className="flex gap-1 justify-end mb-2">
+                    {order.status === 'pending' && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-green-600 hover:bg-green-50 px-2"
+                          onClick={() => updateOrderStatus(order.id, 'completed')}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-red-600 hover:bg-red-50 px-2"
+                          onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                    {order.status === 'cancelled' && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-yellow-600 hover:bg-yellow-50 px-2"
+                        onClick={() => updateOrderStatus(order.id, 'pending')}
+                      >
+                        Restore
+                      </Button>
+                    )}
+                    {order.status === 'completed' && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-yellow-600 hover:bg-yellow-50 px-2"
+                        onClick={() => updateOrderStatus(order.id, 'pending')}
+                      >
+                        Reopen
+                      </Button>
+                    )}
+                  </div>
+                  
                   <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleEditOrder(order)}
+                    >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
