@@ -4,13 +4,13 @@ import React from 'react';
 const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900" />
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-100/30 via-purple-100/20 to-indigo-100/30" />
       
-      {/* Moving lights */}
+      {/* Moving lights with very low opacity */}
       <div className="absolute inset-0">
         {/* Light 1 */}
-        <div className="absolute w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-pulse"
+        <div className="absolute w-96 h-96 bg-blue-200/10 rounded-full blur-3xl animate-pulse"
              style={{
                top: '10%',
                left: '20%',
@@ -18,7 +18,7 @@ const AnimatedBackground = () => {
              }} />
         
         {/* Light 2 */}
-        <div className="absolute w-80 h-80 bg-purple-500/25 rounded-full blur-3xl animate-pulse"
+        <div className="absolute w-80 h-80 bg-purple-200/8 rounded-full blur-3xl animate-pulse"
              style={{
                top: '60%',
                right: '15%',
@@ -26,7 +26,7 @@ const AnimatedBackground = () => {
              }} />
         
         {/* Light 3 */}
-        <div className="absolute w-72 h-72 bg-cyan-400/20 rounded-full blur-3xl animate-pulse"
+        <div className="absolute w-72 h-72 bg-cyan-200/6 rounded-full blur-3xl animate-pulse"
              style={{
                bottom: '20%',
                left: '10%',
@@ -34,7 +34,7 @@ const AnimatedBackground = () => {
              }} />
         
         {/* Light 4 */}
-        <div className="absolute w-64 h-64 bg-pink-500/15 rounded-full blur-3xl animate-pulse"
+        <div className="absolute w-64 h-64 bg-pink-200/5 rounded-full blur-3xl animate-pulse"
              style={{
                top: '40%',
                left: '70%',
@@ -42,7 +42,7 @@ const AnimatedBackground = () => {
              }} />
         
         {/* Additional smaller lights */}
-        <div className="absolute w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl animate-pulse"
+        <div className="absolute w-32 h-32 bg-yellow-200/8 rounded-full blur-2xl animate-pulse"
              style={{
                top: '80%',
                right: '40%',
@@ -50,12 +50,12 @@ const AnimatedBackground = () => {
              }} />
       </div>
       
-      {/* Animated particles */}
+      {/* Animated particles with very low opacity */}
       <div className="absolute inset-0">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {Array.from({ length: 30 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-gray-400/10 rounded-full animate-pulse"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

@@ -80,29 +80,29 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
-      {/* Animated Background */}
+      {/* Animated Background with low opacity */}
       <AnimatedBackground />
       
-      {/* Glass morphism overlay */}
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+      {/* Glass morphism overlay with very low opacity */}
+      <div className="absolute inset-0 bg-black/5 backdrop-blur-sm" />
       
       {/* Main content */}
-      <div className="relative z-10 w-full max-w-md">
-        <Card className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl animate-fade-in">
+      <div className="relative z-10 w-full max-w-lg mx-auto">
+        <Card className="backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl animate-fade-in">
           <CardHeader className="text-center space-y-6 pb-8">
-            {/* Logo with glow effect */}
+            {/* Logo with subtle glow effect */}
             <div className="flex justify-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 animate-pulse">
-                <Package className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-2xl flex items-center justify-center shadow-lg">
+                <Package className="w-8 h-8 text-gray-700" />
               </div>
             </div>
             
-            {/* Title with gradient text */}
+            {/* Title with subtle text */}
             <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold text-gray-800">
                 {isLogin ? 'Welcome Back' : 'Create Account'}
               </CardTitle>
-              <p className="text-white/80 text-lg">
+              <p className="text-gray-600 text-lg">
                 {isLogin ? 'Sign in to your account' : 'Start managing your business today'}
               </p>
             </div>
@@ -113,7 +113,7 @@ const Auth = () => {
               {/* Name field for registration */}
               {!isLogin && (
                 <div className="space-y-2 animate-slide-up">
-                  <Label htmlFor="name" className="text-white/90 font-medium">Full Name</Label>
+                  <Label htmlFor="name" className="text-gray-700 font-medium">Full Name</Label>
                   <Input
                     id="name"
                     type="text"
@@ -121,14 +121,14 @@ const Auth = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={!isLogin}
-                    className="backdrop-blur-md bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/15 focus:border-white/40 transition-all duration-300"
+                    className="backdrop-blur-md bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-500 focus:bg-white/70 focus:border-blue-400 transition-all duration-300"
                   />
                 </div>
               )}
               
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/90 font-medium">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -136,13 +136,13 @@ const Auth = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="backdrop-blur-md bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/15 focus:border-white/40 transition-all duration-300"
+                  className="backdrop-blur-md bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-500 focus:bg-white/70 focus:border-blue-400 transition-all duration-300"
                 />
               </div>
               
               {/* Password field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white/90 font-medium">Password</Label>
+                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -151,12 +151,12 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="backdrop-blur-md bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/15 focus:border-white/40 transition-all duration-300 pr-12"
+                    className="backdrop-blur-md bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-500 focus:bg-white/70 focus:border-blue-400 transition-all duration-300 pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -166,7 +166,7 @@ const Auth = () => {
               {/* Submit button */}
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold text-lg shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold text-lg shadow-lg border-0 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 disabled={loading}
               >
                 {loading ? (
@@ -185,7 +185,7 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-white/80 hover:text-white transition-colors duration-300 font-medium underline decoration-white/40 hover:decoration-white/80"
+                className="text-gray-600 hover:text-gray-800 transition-colors duration-300 font-medium underline decoration-gray-400 hover:decoration-gray-600"
               >
                 {isLogin 
                   ? "Don't have an account? Sign up" 
